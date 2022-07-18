@@ -1,0 +1,87 @@
+#include "notegrid.h"
+
+NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
+    textField = new TextWidget(this);
+    auto *grid = new QGridLayout(this);
+    stack = new QListWidget(this);
+    stack->setMovement(QListView::Free);
+    stack->setStyleSheet("background-color: transparent;");
+
+    isDirty = false;
+    
+    grid->addWidget(stack, 0, 0);
+    grid->addWidget(textField, 1, 0);
+
+    grid->setRowStretch(0, 3);
+    grid->setRowStretch(1, 1);
+
+    setLayout(grid);
+}
+
+QString NoteGrid::getTextFieldContents() {
+    return textField->toPlainText();
+}
+
+void NoteGrid::addItemToList(QString text) {
+    text = text.trimmed();
+    if (text.isEmpty()) { return; }
+    isDirty = true;
+    auto *item = new QListWidgetItem(text);
+    stack->addItem(item);
+}
+
+void NoteGrid::clearTextFieldContents() {
+    textField->clear();
+}
+
+void NoteGrid::unselectList() {
+    stack->selectionModel()->clear();
+}
+
+void NoteGrid::copyItem() {
+    auto items = stack->selectedItems();
+    auto clipboard = QGuiApplication::clipboard();
+    foreach(QListWidgetItem* item, items){
+        clipboard->setText(item->text());
+    }
+}
+
+void NoteGrid::cutItem() {
+    copyItem();
+    deleteItem();
+}
+
+void NoteGrid::pasteItem() {
+    auto clipboard = QGuiApplication::clipboard();
+    if (textField->hasFocus())
+        textField->insertPlainText(clipboard->text());
+    else
+        addItemToList(clipboard->text());
+
+}
+
+void NoteGrid::deleteItem() {
+    auto items = stack->selectedItems();
+    foreach(QListWidgetItem* item, items){
+        stack->removeItemWidget(item);
+        delete item; // Qt documentation warnings you to destroy item to effectively remove it from QListWidget.
+    }
+}
+
+void NoteGrid::clearList() {
+    stack->clear();
+}
+
+QList<QString> NoteGrid::getList() {
+    QList<QString> list;
+    for (int i = 0; i < stack->count(); i++) {
+        list.append(stack->item(i)->text());
+    }
+    return list;
+}
+
+void NoteGrid::addTextToList() {
+    auto text = this->getTextFieldContents();
+    this->addItemToList(text);
+    this->clearTextFieldContents();
+}
