@@ -1,5 +1,8 @@
 #include "notetree.h"
 
+#define _STR(x) #x
+#define STRINGIFY(x)  _STR(x)
+
 NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     auto *quit = new QAction("&Quit", this);
     quit->setShortcut(QKeySequence(QKeySequence::Quit));
@@ -21,6 +24,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     paste->setShortcut(QKeySequence(QKeySequence::Paste));
     auto *delete_item = new QAction("&Delete", this);
     delete_item->setShortcut(QKeySequence(QKeySequence::Delete));
+    auto *about_item = new QAction("&About", this);
+    about_item->setShortcut(QKeySequence(QKeySequence::HelpContents));
 
     notegrid = new NoteGrid(this);
     filePath = "";
@@ -28,6 +33,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
 
     QMenu *file = menuBar()->addMenu("&File");
     QMenu *edit = menuBar()->addMenu("&Edit");
+    QMenu *help = menuBar()->addMenu("&Help");
 
     file->addAction(new_file);
     file->addAction(open_file);
@@ -43,7 +49,13 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     edit->addAction(new_line);
     edit->addAction(delete_item);
 
+    help->addAction(about_item);
+
     setCentralWidget(notegrid);
+
+    QTimer::singleShot(0, this, SIGNAL(appStarting()));
+
+    settings = new QSettings("Mini's Applications", "Note Tree");
 
     connect(quit, SIGNAL(triggered()), this, SLOT(quitMainWindow()));
     connect(new_file, SIGNAL(triggered()), this, SLOT(closeFile()));
@@ -55,12 +67,26 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(paste, &QAction::triggered, notegrid, &NoteGrid::pasteItem);
     connect(open_file, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(save_file_as, SIGNAL(triggered()), this, SLOT(saveAsFileSlot()));
+    connect(about_item, SIGNAL(triggered()), this, SLOT(showAboutWindow()));
+}
+
+void NoteTree::appStarting() {
+    QString lastFilePath = settings->value("files/lastOpened", "").toString();
+    if (!lastFilePath.isEmpty()) { openFile(lastFilePath); }
+}
+
+void NoteTree::showAboutWindow() {
+    QMessageBox aboutwindow;
+    aboutwindow.setText("About Note Tree");
+    aboutwindow.setInformativeText("Git Commit: " + QString(STRINGIFY(GIT_VERSION)) + "\nOS: " + QSysInfo::kernelType() + " " + QSysInfo::kernelVersion() + "\n\nMade by Mini / Amy");
+    aboutwindow.exec();
 }
 
 bool NoteTree::closeFile() {
     if (checkDirty()) { return true; }
     notegrid->clearList();
     filePath = "";
+    settings->setValue("files/lastOpened", "");
     this->updateWindowTitle();
     notegrid->clearTextFieldContents();
     return false;
@@ -100,9 +126,11 @@ void NoteTree::saveAsFileSlot() {
     saveFile(true);
 }
 
-void NoteTree::openFile() {
-    QString filename = QFileDialog::getOpenFileName(this, "Open File", "notes/");
-    if (filename.isEmpty()) { return; }
+void NoteTree::openFile(QString filename) {
+    if (filename.isEmpty()) {
+        filename = QFileDialog::getOpenFileName(this, "Open File", "notes/");
+        if (filename.isEmpty()) { return; }
+    }
     if (closeFile()) { return; }
     QFile file(filename);
     QFileInfo fileInfo(file.fileName());
@@ -128,6 +156,7 @@ void NoteTree::openFile() {
         notegrid->addItemToList(item);
     }
     notegrid->isDirty = false;
+    settings->setValue("files/lastOpened", filePath);
 }
 
 void NoteTree::createNewFile() {

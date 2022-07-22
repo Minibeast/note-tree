@@ -16,6 +16,9 @@
 #include <QDir>
 #include <QSettings>
 #include <QFileDialog>
+#include <QTimer>
+#include <QSettings>
+#include <QSysInfo>
 
 
 class NoteTree : public QMainWindow {
@@ -29,8 +32,10 @@ class NoteTree : public QMainWindow {
         void createNewFile();
         void saveFileSlot();
         void saveAsFileSlot();
-        void openFile();
+        void openFile(QString filename = nullptr);
+        void appStarting();
         bool closeFile();
+        void showAboutWindow();
     protected:
         void closeEvent(QCloseEvent *event);
     private:
