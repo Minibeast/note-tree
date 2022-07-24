@@ -14,9 +14,14 @@ class TextWidget : public QTextEdit {
 
     public:
         TextWidget(QWidget *parent = nullptr);
+    public slots:
+        void increaseFontSize();
+        void decreaseFontSize();
+        void resetZoom();
     protected:
         void focusInEvent(QFocusEvent* event);
         void keyPressEvent(QKeyEvent* event);
     private:
         NoteGrid* notegrid;
+        int textFontSize;
 };

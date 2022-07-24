@@ -27,6 +27,7 @@ class NoteTree : public QMainWindow {
 
     public:
         NoteTree(QWidget *parent = nullptr);
+        void markSaved();
    private slots:
         void quitMainWindow();
         void createNewFile();

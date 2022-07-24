@@ -1,11 +1,14 @@
 #include "notegrid.h"
+#include "notetree.h"
 
 NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
+    notetree = reinterpret_cast<NoteTree*>(parent);
     textField = new TextWidget(this);
     auto *grid = new QGridLayout(this);
     stack = new QListWidget(this);
     stack->setMovement(QListView::Free);
-    stack->setStyleSheet("background-color: transparent;");
+    stackFontSize = 12; // TODO: Add to settings.
+    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
 
     isDirty = false;
     
@@ -26,6 +29,7 @@ void NoteGrid::addItemToList(QString text) {
     text = text.trimmed();
     if (text.isEmpty()) { return; }
     isDirty = true;
+    notetree->markSaved();
     auto *item = new QListWidgetItem(text);
     stack->addItem(item);
 }
@@ -36,6 +40,23 @@ void NoteGrid::clearTextFieldContents() {
 
 void NoteGrid::unselectList() {
     stack->selectionModel()->clear();
+}
+
+void NoteGrid::increaseFontSize() {
+    stackFontSize += 2;
+    if (stackFontSize >= 100) { stackFontSize -= 2; return; }
+    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
+}
+
+void NoteGrid::decreaseFontSize() {
+    stackFontSize -= 2;
+    if (stackFontSize <= 0) { stackFontSize += 2; return; }
+    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
+}
+
+void NoteGrid::resetZoom() {
+    stackFontSize = 12;
+    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
 }
 
 void NoteGrid::copyItem() {
@@ -64,6 +85,8 @@ void NoteGrid::deleteItem() {
     auto items = stack->selectedItems();
     foreach(QListWidgetItem* item, items){
         stack->removeItemWidget(item);
+        isDirty = true;
+        notetree->markSaved();
         delete item; // Qt documentation warnings you to destroy item to effectively remove it from QListWidget.
     }
 }

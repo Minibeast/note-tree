@@ -4,6 +4,8 @@
 TextWidget::TextWidget(QWidget *parent) : QTextEdit(parent) {
     notegrid = reinterpret_cast<NoteGrid*>(parent);
     this->setAcceptRichText(false);
+    textFontSize = 12; // TODO: Add to settings.
+    this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px");
 }
 
 void TextWidget::focusInEvent(QFocusEvent* event) {
@@ -16,4 +18,21 @@ void TextWidget::keyPressEvent(QKeyEvent* event) {
         notegrid->addTextToList();
     else
         QTextEdit::keyPressEvent(event);
+}
+
+void TextWidget::increaseFontSize() {
+    textFontSize += 2;
+    if (textFontSize >= 100) { textFontSize -= 2; return; }
+    this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px;");
+}
+
+void TextWidget::decreaseFontSize() {
+    textFontSize -= 2;
+    if (textFontSize <= 0) { textFontSize += 2; return; }
+    this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px;");
+}
+
+void TextWidget::resetZoom() {
+    textFontSize = 12;
+    this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px;");
 }

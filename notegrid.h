@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QClipboard>
 
+class NoteTree;
 
 class NoteGrid : public QWidget {
     
@@ -23,13 +24,18 @@ class NoteGrid : public QWidget {
         void clearList();
         QList<QString> getList();
         bool isDirty;
+        TextWidget* textField;
     public slots:
         void addTextToList();
         void copyItem();
         void deleteItem();
         void cutItem();
         void pasteItem();
+        void increaseFontSize();
+        void decreaseFontSize();
+        void resetZoom();
     private:
         QListWidget* stack;
-        TextWidget* textField;
+        NoteTree* notetree;
+        int stackFontSize;
 };

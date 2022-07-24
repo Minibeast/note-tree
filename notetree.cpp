@@ -26,6 +26,12 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     delete_item->setShortcut(QKeySequence(QKeySequence::Delete));
     auto *about_item = new QAction("&About", this);
     about_item->setShortcut(QKeySequence(QKeySequence::HelpContents));
+    auto *zoom_in = new QAction("Zoom &In", this);
+    zoom_in->setShortcut(QKeySequence("Ctrl+="));
+    auto *zoom_out = new QAction("Zoom &Out", this);
+    zoom_out->setShortcut(QKeySequence(QKeySequence::ZoomOut));
+    auto *reset_zoom = new QAction("Reset Zoom", this);
+    reset_zoom->setShortcut(QKeySequence("Ctrl+0"));
 
     notegrid = new NoteGrid(this);
     filePath = "";
@@ -33,6 +39,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
 
     QMenu *file = menuBar()->addMenu("&File");
     QMenu *edit = menuBar()->addMenu("&Edit");
+    QMenu *view = menuBar()->addMenu("&View");
     QMenu *help = menuBar()->addMenu("&Help");
 
     file->addAction(new_file);
@@ -48,6 +55,10 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     edit->addSeparator();
     edit->addAction(new_line);
     edit->addAction(delete_item);
+
+    view->addAction(zoom_in);
+    view->addAction(zoom_out);
+    view->addAction(reset_zoom);
 
     help->addAction(about_item);
 
@@ -68,6 +79,12 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(open_file, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(save_file_as, SIGNAL(triggered()), this, SLOT(saveAsFileSlot()));
     connect(about_item, SIGNAL(triggered()), this, SLOT(showAboutWindow()));
+    connect(zoom_in, &QAction::triggered, notegrid, &NoteGrid::increaseFontSize);
+    connect(zoom_out, &QAction::triggered, notegrid, &NoteGrid::decreaseFontSize);
+    connect(zoom_in, &QAction::triggered, notegrid->textField, &TextWidget::increaseFontSize);
+    connect(zoom_out, &QAction::triggered, notegrid->textField, &TextWidget::decreaseFontSize);
+    connect(reset_zoom, &QAction::triggered, notegrid, &NoteGrid::resetZoom);
+    connect(reset_zoom, &QAction::triggered, notegrid->textField, &TextWidget::resetZoom);
 }
 
 void NoteTree::appStarting() {
@@ -113,9 +130,11 @@ void NoteTree::saveFile(bool saveAs) {
     QTextStream out(&file);
 
     foreach (QString item, itemList) {
+        item = item.replace("\n\n", "\n,\n");
         out << item << Qt::endl << Qt::endl;
     }
     notegrid->isDirty = false;
+    markSaved();
 }
 
 void NoteTree::saveFileSlot() {
@@ -146,6 +165,7 @@ void NoteTree::openFile(QString filename) {
     while (!(line = in.readLine()).isNull())
     {
         if (line.isEmpty() && !item.isEmpty()) {
+            item = item.replace("\n,\n", "\n\n");
             notegrid->addItemToList(item);
             item = "";
         } else {
@@ -156,6 +176,7 @@ void NoteTree::openFile(QString filename) {
         notegrid->addItemToList(item);
     }
     notegrid->isDirty = false;
+    markSaved();
     settings->setValue("files/lastOpened", filePath);
 }
 
@@ -181,6 +202,18 @@ void NoteTree::updateWindowTitle(QString title) {
     this->setWindowTitle("Note Tree" + (title.isNull() ? "" : " : " + title));
 }
 
+void NoteTree::markSaved() {
+    if (notegrid->isDirty && !this->windowTitle().endsWith("*")) {
+        // If dirty and doesn't have star, apply star.
+        this->setWindowTitle(this->windowTitle() + "*");
+    } else if (!notegrid->isDirty && this->windowTitle().endsWith("*")) {
+        // If has star but is not dirty, remove it.
+        QString window_title = this->windowTitle();
+        window_title.chop(1);
+        this->setWindowTitle(window_title);
+    }
+}
+
 void NoteTree::quitMainWindow() {
     this->close();
 }
@@ -200,6 +233,7 @@ bool NoteTree::checkDirty() {
             return false;
         case QMessageBox::Discard:
             notegrid->isDirty = false;
+            markSaved();
             return false;
         case QMessageBox::Cancel:
             return true;
