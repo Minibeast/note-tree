@@ -1,10 +1,11 @@
 #include "textwidget.h"
 #include "notegrid.h"
+#include "notetree.h"
 
 TextWidget::TextWidget(QWidget *parent) : QTextEdit(parent) {
     notegrid = reinterpret_cast<NoteGrid*>(parent);
     this->setAcceptRichText(false);
-    textFontSize = 12; // TODO: Add to settings.
+    textFontSize = notegrid->notetree->settings->value("view/textFont", 12).toInt(); // TODO: Add to settings.
     this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px");
 }
 
@@ -23,12 +24,14 @@ void TextWidget::keyPressEvent(QKeyEvent* event) {
 void TextWidget::increaseFontSize() {
     textFontSize += 2;
     if (textFontSize >= 100) { textFontSize -= 2; return; }
+    notegrid->notetree->settings->setValue("view/textFont", textFontSize);
     this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px;");
 }
 
 void TextWidget::decreaseFontSize() {
     textFontSize -= 2;
     if (textFontSize <= 0) { textFontSize += 2; return; }
+    notegrid->notetree->settings->setValue("view/textFont", textFontSize);
     this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px;");
 }
 

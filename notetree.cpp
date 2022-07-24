@@ -32,6 +32,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     zoom_out->setShortcut(QKeySequence(QKeySequence::ZoomOut));
     auto *reset_zoom = new QAction("Reset Zoom", this);
     reset_zoom->setShortcut(QKeySequence("Ctrl+0"));
+   
+    settings = new QSettings("Mini's Applications", "Note Tree");
 
     notegrid = new NoteGrid(this);
     filePath = "";
@@ -66,7 +68,6 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
 
     QTimer::singleShot(0, this, SIGNAL(appStarting()));
 
-    settings = new QSettings("Mini's Applications", "Note Tree");
 
     connect(quit, SIGNAL(triggered()), this, SLOT(quitMainWindow()));
     connect(new_file, SIGNAL(triggered()), this, SLOT(closeFile()));

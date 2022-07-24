@@ -28,6 +28,7 @@ class NoteTree : public QMainWindow {
     public:
         NoteTree(QWidget *parent = nullptr);
         void markSaved();
+        QSettings* settings;
    private slots:
         void quitMainWindow();
         void createNewFile();
@@ -44,7 +45,5 @@ class NoteTree : public QMainWindow {
         void updateWindowTitle(QString title = QString());
         bool checkDirty();
         QString filePath;
-        QSettings* settings;
         NoteGrid* notegrid;
-
 };

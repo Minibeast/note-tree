@@ -25,6 +25,7 @@ class NoteGrid : public QWidget {
         QList<QString> getList();
         bool isDirty;
         TextWidget* textField;
+        NoteTree* notetree;
     public slots:
         void addTextToList();
         void copyItem();
@@ -36,6 +37,5 @@ class NoteGrid : public QWidget {
         void resetZoom();
     private:
         QListWidget* stack;
-        NoteTree* notetree;
         int stackFontSize;
 };

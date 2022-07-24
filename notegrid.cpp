@@ -7,7 +7,7 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
     auto *grid = new QGridLayout(this);
     stack = new QListWidget(this);
     stack->setMovement(QListView::Free);
-    stackFontSize = 12; // TODO: Add to settings.
+    stackFontSize = notetree->settings->value("view/stackFont", 12).toInt(); // TODO: Add to settings.
     stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
 
     isDirty = false;
@@ -45,12 +45,14 @@ void NoteGrid::unselectList() {
 void NoteGrid::increaseFontSize() {
     stackFontSize += 2;
     if (stackFontSize >= 100) { stackFontSize -= 2; return; }
+    notetree->settings->setValue("view/stackFont", stackFontSize);
     stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
 }
 
 void NoteGrid::decreaseFontSize() {
     stackFontSize -= 2;
     if (stackFontSize <= 0) { stackFontSize += 2; return; }
+    notetree->settings->setValue("view/stackFont", stackFontSize);
     stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
 }
 
