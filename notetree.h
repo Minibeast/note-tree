@@ -20,6 +20,8 @@
 #include <QSettings>
 #include <QSysInfo>
 #include <QStatusBar>
+#include <QDesktopServices>
+#include <QProcess>
 
 
 class NoteTree : public QMainWindow {
@@ -40,6 +42,7 @@ class NoteTree : public QMainWindow {
         bool closeFile();
         void showAboutWindow();
         void toggleStatusBar();
+        void openFileLocation();
     protected:
         void closeEvent(QCloseEvent *event);
     private:

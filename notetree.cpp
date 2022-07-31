@@ -39,6 +39,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     view_statusbar->setCheckable(true);
     view_statusbar->setChecked(settings->value("view/statusbar", true).toBool());
     toggleStatusBar();
+    auto *open_file_location = new QAction("Open File Location", this);
+    open_file_location->setShortcut(QKeySequence("Ctrl+Shift+O"));
 
     notegrid = new NoteGrid(this);
     filePath = "";
@@ -51,6 +53,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
 
     file->addAction(new_file);
     file->addAction(open_file);
+    file->addAction(open_file_location);
     file->addAction(save_file);
     file->addAction(save_file_as);
     file->addSeparator();
@@ -94,6 +97,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(reset_zoom, &QAction::triggered, notegrid, &NoteGrid::resetZoom);
     connect(reset_zoom, &QAction::triggered, notegrid->textField, &TextWidget::resetZoom);
     connect(view_statusbar, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
+    connect(open_file_location, SIGNAL(triggered()), this, SLOT(openFileLocation()));
 }
 
 void NoteTree::appStarting() {
@@ -161,6 +165,38 @@ void NoteTree::saveFileSlot() {
 
 void NoteTree::saveAsFileSlot() {
     saveFile(true);
+}
+
+void NoteTree::openFileLocation() {
+    /* https://stackoverflow.com/a/46019091
+     Doesn't have Linux support because file browsers are funny. That final catch at the end is "good enough" for Linux users.
+     TODO: add something in for GNOME (nautilus) or KDE (dolphin).
+     */
+    QString path = filePath;
+    QFileInfo info(path);
+    #if defined(Q_OS_WIN)
+        QStringList args;
+        if (!info.isDir())
+            args << "/select,";
+        args << QDir::toNativeSeparators(path);
+        if (QProcess::startDetached("explorer", args))
+            return;
+    #elif defined(Q_OS_MAC)
+        QStringList args;
+        args << "-e";
+        args << "tell application \"Finder\"";
+        args << "-e";
+        args << "activate";
+        args << "-e";
+        args << "select POSIX file \"" + path + "\"";
+        args << "-e";
+        args << "end tell";
+        args << "-e";
+        args << "return";
+        if (!QProcess::execute("/usr/bin/osascript", args))
+            return;
+    #endif
+        QDesktopServices::openUrl(QUrl::fromLocalFile(info.isDir()? path : info.path()));
 }
 
 void NoteTree::openFile(QString filename) {
