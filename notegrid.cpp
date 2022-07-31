@@ -8,7 +8,7 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
     stack = new QListWidget(this);
     stack->setMovement(QListView::Free);
     stack->setWordWrap(true);
-    stackFontSize = notetree->settings->value("view/stackFont", 12).toInt(); // TODO: Add to settings.
+    stackFontSize = notetree->settings->value("view/stackFont", 12).toInt();
     stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
 
     isDirty = false;

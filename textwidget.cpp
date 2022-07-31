@@ -5,7 +5,7 @@
 TextWidget::TextWidget(QWidget *parent) : QTextEdit(parent) {
     notegrid = reinterpret_cast<NoteGrid*>(parent);
     this->setAcceptRichText(false);
-    textFontSize = notegrid->notetree->settings->value("view/textFont", 12).toInt(); // TODO: Add to settings.
+    textFontSize = notegrid->notetree->settings->value("view/textFont", 12).toInt();
     this->setStyleSheet("font-size: " + QString::number(textFontSize) + "px");
 }
 
