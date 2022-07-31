@@ -1,7 +1,13 @@
 Note Tree
+Note Tree.xcodeproj
+.DS_Store
+info.plist
+
 
 notes/
 .vscode/
+.xcode/
+Debug/
 
 # C++ objects and libs
 *.slo
