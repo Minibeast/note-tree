@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <QSettings>
 #include <QSysInfo>
+#include <QStatusBar>
 
 
 class NoteTree : public QMainWindow {
@@ -38,6 +39,7 @@ class NoteTree : public QMainWindow {
         void appStarting();
         bool closeFile();
         void showAboutWindow();
+        void toggleStatusBar();
     protected:
         void closeEvent(QCloseEvent *event);
     private:
@@ -46,4 +48,5 @@ class NoteTree : public QMainWindow {
         bool checkDirty();
         QString filePath;
         NoteGrid* notegrid;
+        QAction* view_statusbar;
 };

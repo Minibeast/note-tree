@@ -4,6 +4,8 @@
 #define STRINGIFY(x)  _STR(x)
 
 NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
+    settings = new QSettings("Mini's Applications", "Note Tree");
+
     auto *quit = new QAction("&Quit", this);
     quit->setShortcut(QKeySequence(QKeySequence::Quit));
     auto *new_file = new QAction("&New", this);
@@ -32,8 +34,11 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     zoom_out->setShortcut(QKeySequence(QKeySequence::ZoomOut));
     auto *reset_zoom = new QAction("Reset Zoom", this);
     reset_zoom->setShortcut(QKeySequence("Ctrl+0"));
-   
-    settings = new QSettings("Mini's Applications", "Note Tree");
+    view_statusbar = new QAction("View &Statusbar", this);
+    view_statusbar->setShortcut(QKeySequence("Ctrl+/"));
+    view_statusbar->setCheckable(true);
+    view_statusbar->setChecked(settings->value("view/statusbar", true).toBool());
+    toggleStatusBar();
 
     notegrid = new NoteGrid(this);
     filePath = "";
@@ -61,6 +66,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     view->addAction(zoom_in);
     view->addAction(zoom_out);
     view->addAction(reset_zoom);
+    view->addSeparator();
+    view->addAction(view_statusbar);
 
     help->addAction(about_item);
 
@@ -86,6 +93,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(zoom_out, &QAction::triggered, notegrid->textField, &TextWidget::decreaseFontSize);
     connect(reset_zoom, &QAction::triggered, notegrid, &NoteGrid::resetZoom);
     connect(reset_zoom, &QAction::triggered, notegrid->textField, &TextWidget::resetZoom);
+    connect(view_statusbar, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
 }
 
 void NoteTree::appStarting() {
@@ -98,6 +106,14 @@ void NoteTree::showAboutWindow() {
     aboutwindow.setText("About Note Tree");
     aboutwindow.setInformativeText("Git Commit: " + QString(STRINGIFY(GIT_VERSION)) + "\nOS: " + QSysInfo::kernelType() + " " + QSysInfo::kernelVersion() + "\n\nMade by Mini / Amy");
     aboutwindow.exec();
+}
+
+void NoteTree::toggleStatusBar() {
+    if (view_statusbar->isChecked())
+        statusBar()->show();
+    else
+        statusBar()->hide();
+    settings->setValue("view/statusbar", view_statusbar->isChecked());
 }
 
 bool NoteTree::closeFile() {
@@ -136,6 +152,7 @@ void NoteTree::saveFile(bool saveAs) {
     }
     notegrid->isDirty = false;
     markSaved();
+    settings->setValue("files/lastOpened", filePath);
 }
 
 void NoteTree::saveFileSlot() {
@@ -201,6 +218,8 @@ void NoteTree::createNewFile() {
 
 void NoteTree::updateWindowTitle(QString title) {
     this->setWindowTitle("Note Tree" + (title.isNull() ? "" : " : " + title));
+    if (!filePath.isNull())
+        this->statusBar()->showMessage(filePath);
 }
 
 void NoteTree::markSaved() {
