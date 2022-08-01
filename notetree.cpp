@@ -54,6 +54,12 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     file->addAction(new_file);
     file->addAction(open_file);
     file->addAction(open_file_location);
+    recentItemsGroup = file->addMenu("Recent Items");
+    recentItems = settings->value("files/recentItems").toStringList();
+    clear_recent_items = new QAction("Clear Recent Items");
+    connect(clear_recent_items, SIGNAL(triggered()), this, SLOT(clearRecentItems()));
+    updateRecentItemsMenu(false); // No reason to set the list when nothing gets modified.
+    file->addSeparator();
     file->addAction(save_file);
     file->addAction(save_file_as);
     file->addSeparator();
@@ -112,6 +118,39 @@ void NoteTree::showAboutWindow() {
     aboutwindow.exec();
 }
 
+void NoteTree::updateRecentItemsMenu(bool setSettingsList = true) {
+    recentItemsGroup->clear();
+    recentItems.removeDuplicates();
+    for (int i = 0; i < recentItems.length() && i < 10; i++) {
+        if (recentItems[i] == filePath) {
+            recentItems.removeAt(i);
+            continue;
+        }
+        auto *action = new QAction(recentItems[i]);
+        recentItemsGroup->addAction(action);
+        connect(action, SIGNAL(triggered()), this, SLOT(openRecentFile()));
+    }
+    while (recentItems.length() > 10) { // Clear the list if it gets bigger than 10. While loop for a total catch all in case some code doesn't keep it balanced correctly.
+        recentItems.removeLast();
+    }
+    recentItemsGroup->addSeparator();
+    recentItemsGroup->addAction(clear_recent_items);
+    if (setSettingsList)
+        settings->setValue("files/recentItems", recentItems);
+}
+
+void NoteTree::clearRecentItems() {
+    recentItems.clear();
+    updateRecentItemsMenu();
+}
+
+void NoteTree::openRecentFile() {
+    QAction *action = qobject_cast<QAction *>(sender());
+    if (action) {
+        openFile(action->text());
+    }
+}
+
 void NoteTree::toggleStatusBar() {
     if (view_statusbar->isChecked())
         statusBar()->show();
@@ -123,7 +162,10 @@ void NoteTree::toggleStatusBar() {
 bool NoteTree::closeFile() {
     if (checkDirty()) { return true; }
     notegrid->clearList();
+    if (!filePath.isEmpty())
+        recentItems.insert(0, filePath);
     filePath = "";
+    updateRecentItemsMenu();
     settings->setValue("files/lastOpened", "");
     this->updateWindowTitle();
     notegrid->clearTextFieldContents();
@@ -208,6 +250,7 @@ void NoteTree::openFile(QString filename) {
     QFile file(filename);
     QFileInfo fileInfo(file.fileName());
     filePath = filename;
+    updateRecentItemsMenu();
     this->updateWindowTitle(fileInfo.fileName());
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -232,24 +275,6 @@ void NoteTree::openFile(QString filename) {
     notegrid->isDirty = false;
     markSaved();
     settings->setValue("files/lastOpened", filePath);
-}
-
-void NoteTree::createNewFile() {
-    QMessageBox msgBox;
-    msgBox.setText("Create New Document.");
-    msgBox.setInformativeText("Do you want to create a new document?");
-    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    int ret = msgBox.exec();
-
-    switch (ret) {
-        case QMessageBox::Ok:
-            return;
-        case QMessageBox::Cancel:
-            return;
-        default:
-            return;
-    }
 }
 
 void NoteTree::updateWindowTitle(QString title) {

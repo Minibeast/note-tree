@@ -34,7 +34,6 @@ class NoteTree : public QMainWindow {
         QSettings* settings;
    private slots:
         void quitMainWindow();
-        void createNewFile();
         void saveFileSlot();
         void saveAsFileSlot();
         void openFile(QString filename = nullptr);
@@ -43,13 +42,19 @@ class NoteTree : public QMainWindow {
         void showAboutWindow();
         void toggleStatusBar();
         void openFileLocation();
+        void openRecentFile();
+        void clearRecentItems();
     protected:
         void closeEvent(QCloseEvent *event);
     private:
         void saveFile(bool saveAs);
         void updateWindowTitle(QString title = QString());
         bool checkDirty();
+        void updateRecentItemsMenu(bool setSettingsList);
         QString filePath;
         NoteGrid* notegrid;
         QAction* view_statusbar;
+        QAction* clear_recent_items;
+        QMenu *recentItemsGroup;
+        QStringList recentItems;
 };
