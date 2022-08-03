@@ -7,6 +7,18 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     settings = new QSettings("Mini's Applications", "Note Tree");
     this->restoreGeometry(settings->value("view/geometry").toByteArray());
 
+    aboutwindow.setText("About Note Tree");
+    aboutwindow.setInformativeText("Git Commit: " + QString(STRINGIFY(GIT_VERSION)) + "\nOS: " + QSysInfo::kernelType() + " " + QSysInfo::kernelVersion() + "\n\nMade by Mini / Amy");
+    fileNotFound.setText("The file that was attempted to open does not exist.");
+    fileNotFound.setIcon(QMessageBox::Critical);
+    saveChanges.setText("The document has been modified.");
+    saveChanges.setInformativeText("Do you want to save your changes?");
+    saveChanges.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    saveChanges.setDefaultButton(QMessageBox::Save);
+    saveChanges.setIcon(QMessageBox::Warning);
+    notTextFile.setText("Something went wrong with reading/writing to the file.");
+    notTextFile.setIcon(QMessageBox::Critical);
+
     auto *quit = new QAction("&Quit", this);
     quit->setShortcut(QKeySequence(QKeySequence::Quit));
     auto *new_file = new QAction("&New", this);
@@ -113,9 +125,6 @@ void NoteTree::appStarting() {
 }
 
 void NoteTree::showAboutWindow() {
-    QMessageBox aboutwindow;
-    aboutwindow.setText("About Note Tree");
-    aboutwindow.setInformativeText("Git Commit: " + QString(STRINGIFY(GIT_VERSION)) + "\nOS: " + QSysInfo::kernelType() + " " + QSysInfo::kernelVersion() + "\n\nMade by Mini / Amy");
     aboutwindow.exec();
 }
 
@@ -204,8 +213,11 @@ void NoteTree::saveFile(bool saveAs) {
     QFileInfo fileInfo(file.fileName());
     this->updateWindowTitle(fileInfo.fileName());
 
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        notTextFile.setInformativeText("Make sure the current user has the permission to read/write to " + visibleFilePath(filePath));
+        notTextFile.exec();
         return;
+    }
     
     QList<QString> itemList = notegrid->getList();
     QTextStream out(&file);
@@ -267,10 +279,7 @@ void NoteTree::openFile(QString filename) {
     }
     QFile file(filename);
     if (!file.exists()) {
-        QMessageBox fileNotFound;
-        fileNotFound.setText("The file that was attempted to open does not exist.");
-        fileNotFound.setInformativeText(filename + " could not be found.");
-        fileNotFound.setIcon(QMessageBox::Critical);
+        fileNotFound.setInformativeText(visibleFilePath(filename) + " could not be found.");
         fileNotFound.exec();
         if (recentItems.contains(filename)) {
             recentItems.removeAll(filename); // Removes all instances of that filename from recent items, the most likely place to get deleted files.
@@ -281,11 +290,14 @@ void NoteTree::openFile(QString filename) {
     if (closeFile()) { return; }
     QFileInfo fileInfo(file.fileName());
     filePath = filename;
-    updateRecentItemsMenu();
-    this->updateWindowTitle(fileInfo.fileName());
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        notTextFile.setInformativeText("Make sure the current user has the permission to read/write to " + visibleFilePath(filePath));
+        notTextFile.exec();
+        filePath = "";
         return;
+    }
 
     QTextStream in(&file);
     QString line;
@@ -305,6 +317,8 @@ void NoteTree::openFile(QString filename) {
     }
     notegrid->isDirty = false;
     markSaved();
+    updateRecentItemsMenu();
+    this->updateWindowTitle(fileInfo.fileName());
     settings->setValue("files/lastOpened", filePath);
 }
 
@@ -338,12 +352,7 @@ void NoteTree::quitMainWindow() {
 
 bool NoteTree::checkDirty() {
     if (!notegrid->isDirty) { return false; }
-    QMessageBox msgBox;
-    msgBox.setText("The document has been modified.");
-    msgBox.setInformativeText("Do you want to save your changes?");
-    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::Save);
-    int ret = msgBox.exec();
+    int ret = saveChanges.exec();
 
     switch (ret) {
         case QMessageBox::Save:

@@ -60,4 +60,9 @@ class NoteTree : public QMainWindow {
         QAction* clear_recent_items;
         QMenu *recentItemsGroup;
         QStringList recentItems;
+
+        QMessageBox aboutwindow;
+        QMessageBox fileNotFound;
+        QMessageBox saveChanges;
+        QMessageBox notTextFile;
 };
