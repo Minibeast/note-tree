@@ -6,6 +6,8 @@
 NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     settings = new QSettings("Mini's Applications", "Note Tree");
     this->restoreGeometry(settings->value("view/geometry").toByteArray());
+    notegrid = new NoteGrid(this);
+
 
     aboutwindow.setText("About Note Tree");
     aboutwindow.setInformativeText("Git Commit: " + QString(STRINGIFY(GIT_VERSION)) + "\nOS: " + QSysInfo::kernelType() + " " + QSysInfo::kernelVersion() + "\n\nMade by Mini / Amy");
@@ -47,15 +49,20 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     zoom_out->setShortcut(QKeySequence(QKeySequence::ZoomOut));
     auto *reset_zoom = new QAction("Reset Zoom", this);
     reset_zoom->setShortcut(QKeySequence("Ctrl+0"));
-    view_statusbar = new QAction("View &Statusbar", this);
+    view_statusbar = new QAction("View &Status Bar", this);
     view_statusbar->setShortcut(QKeySequence("Ctrl+/"));
     view_statusbar->setCheckable(true);
     view_statusbar->setChecked(settings->value("view/statusbar", true).toBool());
+    statusbar_showcount = new QAction("Show Item Counter", this);
+    statusbar_showcount->setCheckable(true);
+    statusbar_showcount->setChecked(settings->value("view/statusbar_showcount", true).toBool());
+    statusbar_showpath = new QAction("Show File Path", this);
+    statusbar_showpath->setCheckable(true);
+    statusbar_showpath->setChecked(settings->value("view/statusbar_showpath", true).toBool());
     toggleStatusBar();
     auto *open_file_location = new QAction("Open File Location", this);
     open_file_location->setShortcut(QKeySequence("Ctrl+Shift+O"));
 
-    notegrid = new NoteGrid(this);
     filePath = "";
     this->updateWindowTitle();
 
@@ -85,18 +92,22 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     edit->addAction(new_line);
     edit->addAction(delete_item);
 
+    QMenu *statusbar_menu = view->addMenu("Status Bar");
+    statusbar_menu->addAction(view_statusbar);
+    statusbar_menu->addSeparator();
+    statusbar_menu->addAction(statusbar_showpath);
+    statusbar_menu->addAction(statusbar_showcount);
+
+    view->addSeparator();
     view->addAction(zoom_in);
     view->addAction(zoom_out);
     view->addAction(reset_zoom);
-    view->addSeparator();
-    view->addAction(view_statusbar);
 
     help->addAction(about_item);
 
     setCentralWidget(notegrid);
 
     QTimer::singleShot(0, this, SIGNAL(appStarting()));
-
 
     connect(quit, SIGNAL(triggered()), this, SLOT(quitMainWindow()));
     connect(new_file, SIGNAL(triggered()), this, SLOT(closeFile()));
@@ -116,6 +127,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(reset_zoom, &QAction::triggered, notegrid, &NoteGrid::resetZoom);
     connect(reset_zoom, &QAction::triggered, notegrid->textField, &TextWidget::resetZoom);
     connect(view_statusbar, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
+    connect(statusbar_showpath, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
+    connect(statusbar_showcount, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
     connect(open_file_location, SIGNAL(triggered()), this, SLOT(openFileLocation()));
 }
 
@@ -162,11 +175,15 @@ void NoteTree::openRecentFile() {
 }
 
 void NoteTree::toggleStatusBar() {
-    if (view_statusbar->isChecked())
+    if (view_statusbar->isChecked()) {
+        updateStatusBar();
         statusBar()->show();
+    }
     else
         statusBar()->hide();
     settings->setValue("view/statusbar", view_statusbar->isChecked());
+    settings->setValue("view/statusbar_showpath", statusbar_showpath->isChecked());
+    settings->setValue("view/statusbar_showcount", statusbar_showcount->isChecked());
 }
 
 QString NoteTree::visibleFilePath(QString path) {
@@ -313,6 +330,7 @@ void NoteTree::openFile(QString filename) {
         }
     }
     if (!item.isEmpty()) {
+        item = item.replace("\n,\n", "\n\n");
         notegrid->addItemToList(item);
     }
     notegrid->isDirty = false;
@@ -328,10 +346,14 @@ void NoteTree::updateWindowTitle(QString title) {
 }
 
 void NoteTree::updateStatusBar() {
-    if (!filePath.isEmpty())
+    if (!filePath.isEmpty() && statusbar_showpath->isChecked() && statusbar_showcount->isChecked())
         this->statusBar()->showMessage(QString::number(notegrid->getListCount()) + " : " + visibleFilePath(filePath));
-    else
+    else if (statusbar_showcount->isChecked())
         this->statusBar()->showMessage(QString::number(notegrid->getList().count()));
+    else if (!filePath.isEmpty() && statusbar_showpath->isChecked() && !statusbar_showcount->isChecked())
+        this->statusBar()->showMessage(visibleFilePath(filePath));
+    else
+        this->statusBar()->showMessage("");
 }
 
 void NoteTree::markSaved() {

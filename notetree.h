@@ -57,6 +57,8 @@ class NoteTree : public QMainWindow {
         QString filePath;
         NoteGrid* notegrid;
         QAction* view_statusbar;
+        QAction* statusbar_showcount;
+        QAction* statusbar_showpath;
         QAction* clear_recent_items;
         QMenu *recentItemsGroup;
         QStringList recentItems;
