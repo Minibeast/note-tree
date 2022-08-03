@@ -31,6 +31,7 @@ class NoteTree : public QMainWindow {
     public:
         NoteTree(QWidget *parent = nullptr);
         void markSaved();
+        void updateStatusBar();
         QSettings* settings;
    private slots:
         void quitMainWindow();

@@ -23,6 +23,7 @@ class NoteGrid : public QWidget {
         void unselectList();
         void clearList();
         QList<QString> getList();
+        int getListCount();
         bool isDirty;
         TextWidget* textField;
         NoteTree* notetree;

@@ -33,6 +33,7 @@ void NoteGrid::addItemToList(QString text) {
     notetree->markSaved();
     auto *item = new QListWidgetItem(text);
     stack->addItem(item);
+    notetree->updateStatusBar();
 }
 
 void NoteGrid::clearTextFieldContents() {
@@ -104,6 +105,10 @@ QList<QString> NoteGrid::getList() {
         list.append(stack->item(i)->text());
     }
     return list;
+}
+
+int NoteGrid::getListCount() {
+    return stack->count();
 }
 
 void NoteGrid::addTextToList() {

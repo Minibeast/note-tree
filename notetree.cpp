@@ -293,8 +293,14 @@ void NoteTree::openFile(QString filename) {
 
 void NoteTree::updateWindowTitle(QString title) {
     this->setWindowTitle("Note Tree" + (title.isNull() ? "" : " : " + title));
-    if (!filePath.isNull())
-        this->statusBar()->showMessage(filePath);
+    updateStatusBar();
+}
+
+void NoteTree::updateStatusBar() {
+    if (!filePath.isEmpty())
+        this->statusBar()->showMessage(QString::number(notegrid->getListCount()) + " : " + filePath);
+    else
+        this->statusBar()->showMessage(QString::number(notegrid->getList().count()));
 }
 
 void NoteTree::markSaved() {
