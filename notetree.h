@@ -22,6 +22,7 @@
 #include <QStatusBar>
 #include <QDesktopServices>
 #include <QProcess>
+#include <QStandardPaths>
 
 
 class NoteTree : public QMainWindow {
@@ -50,8 +51,9 @@ class NoteTree : public QMainWindow {
     private:
         void saveFile(bool saveAs);
         void updateWindowTitle(QString title = QString());
+        QString visibleFilePath(QString path = nullptr);
         bool checkDirty();
-        void updateRecentItemsMenu(bool setSettingsList);
+        void updateRecentItemsMenu(bool setSettingsList = true);
         QString filePath;
         NoteGrid* notegrid;
         QAction* view_statusbar;

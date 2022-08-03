@@ -119,7 +119,7 @@ void NoteTree::showAboutWindow() {
     aboutwindow.exec();
 }
 
-void NoteTree::updateRecentItemsMenu(bool setSettingsList = true) {
+void NoteTree::updateRecentItemsMenu(bool setSettingsList) {
     recentItemsGroup->clear();
     recentItems.removeDuplicates();
     for (int i = 0; i < recentItems.length() && i < 10; i++) {
@@ -127,7 +127,7 @@ void NoteTree::updateRecentItemsMenu(bool setSettingsList = true) {
             recentItems.removeAt(i);
             continue;
         }
-        auto *action = new QAction(recentItems[i]);
+        auto *action = new QAction(visibleFilePath(recentItems[i]));
         recentItemsGroup->addAction(action);
         connect(action, SIGNAL(triggered()), this, SLOT(openRecentFile()));
     }
@@ -148,7 +148,7 @@ void NoteTree::clearRecentItems() {
 void NoteTree::openRecentFile() {
     QAction *action = qobject_cast<QAction *>(sender());
     if (action) {
-        openFile(action->text());
+        openFile(action->text().replace("~", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)));
     }
 }
 
@@ -158,6 +158,17 @@ void NoteTree::toggleStatusBar() {
     else
         statusBar()->hide();
     settings->setValue("view/statusbar", view_statusbar->isChecked());
+}
+
+QString NoteTree::visibleFilePath(QString path) {
+    QString tempPath = filePath;
+    if (!path.isNull())
+        tempPath = path;
+#ifndef Q_OS_WIN // Windows has no common shorthand for a user's home folder.
+    return tempPath.replace(QStandardPaths::writableLocation(QStandardPaths::HomeLocation), "~");
+#else
+    return tempPath;
+#endif
 }
 
 bool NoteTree::closeFile() {
@@ -304,7 +315,7 @@ void NoteTree::updateWindowTitle(QString title) {
 
 void NoteTree::updateStatusBar() {
     if (!filePath.isEmpty())
-        this->statusBar()->showMessage(QString::number(notegrid->getListCount()) + " : " + filePath);
+        this->statusBar()->showMessage(QString::number(notegrid->getListCount()) + " : " + visibleFilePath(filePath));
     else
         this->statusBar()->showMessage(QString::number(notegrid->getList().count()));
 }
