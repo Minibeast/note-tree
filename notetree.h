@@ -46,6 +46,7 @@ class NoteTree : public QMainWindow {
         void openFileLocation();
         void openRecentFile();
         void clearRecentItems();
+        void newWindow();
     protected:
         void closeEvent(QCloseEvent *event);
     private:

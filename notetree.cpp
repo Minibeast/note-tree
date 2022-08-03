@@ -23,8 +23,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
 
     auto *quit = new QAction("&Quit", this);
     quit->setShortcut(QKeySequence(QKeySequence::Quit));
-    auto *new_file = new QAction("&New", this);
-    new_file->setShortcut(QKeySequence(QKeySequence::New));
+    auto *new_file = new QAction("&Close File", this);
+    new_file->setShortcut(QKeySequence(QKeySequence::Close));
     auto *open_file = new QAction("&Open", this);
     open_file->setShortcut(QKeySequence(QKeySequence::Open));
     auto *save_file = new QAction("&Save", this);
@@ -62,6 +62,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     toggleStatusBar();
     auto *open_file_location = new QAction("Open File Location", this);
     open_file_location->setShortcut(QKeySequence("Ctrl+Shift+O"));
+    auto *new_window = new QAction("New Window", this);
+    new_window->setShortcut(QKeySequence(QKeySequence::New));
 
     filePath = "";
     this->updateWindowTitle();
@@ -71,7 +73,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     QMenu *view = menuBar()->addMenu("&View");
     QMenu *help = menuBar()->addMenu("&Help");
 
-    file->addAction(new_file);
+    file->addAction(new_window);
     file->addAction(open_file);
     file->addAction(open_file_location);
     recentItemsGroup = file->addMenu("Recent Items");
@@ -79,6 +81,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     clear_recent_items = new QAction("Clear Recent Items");
     connect(clear_recent_items, SIGNAL(triggered()), this, SLOT(clearRecentItems()));
     updateRecentItemsMenu(false); // No reason to set the list when nothing gets modified.
+    file->addAction(new_file);
     file->addSeparator();
     file->addAction(save_file);
     file->addAction(save_file_as);
@@ -130,6 +133,11 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(statusbar_showpath, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
     connect(statusbar_showcount, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
     connect(open_file_location, SIGNAL(triggered()), this, SLOT(openFileLocation()));
+    connect(new_window, SIGNAL(triggered()), this, SLOT(newWindow()));
+}
+
+void NoteTree::newWindow() {
+    QProcess::startDetached(QFileInfo(QCoreApplication::applicationFilePath()).absoluteFilePath(), QStringList());
 }
 
 void NoteTree::appStarting() {
