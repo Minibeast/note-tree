@@ -5,6 +5,7 @@
 
 NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     settings = new QSettings("Mini's Applications", "Note Tree");
+    this->restoreGeometry(settings->value("view/geometry").toByteArray());
 
     auto *quit = new QAction("&Quit", this);
     quit->setShortcut(QKeySequence(QKeySequence::Quit));
@@ -337,7 +338,10 @@ bool NoteTree::checkDirty() {
 }
 
 void NoteTree::closeEvent(QCloseEvent *event) {
-    if (this->checkDirty()) { event->ignore(); }
-    else // lol
-    QMainWindow::closeEvent(event);
+    if (this->checkDirty())
+        event->ignore();
+    else {
+        settings->setValue("view/geometry", saveGeometry());
+        QMainWindow::closeEvent(event);
+    }
 }
