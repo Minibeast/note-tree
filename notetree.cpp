@@ -176,7 +176,7 @@ bool NoteTree::closeFile() {
 void NoteTree::saveFile(bool saveAs) {
     QString filename;
     if (filePath.isEmpty() || saveAs)
-        filename = QFileDialog::getSaveFileName(this, "Save File", "notes/");
+        filename = QFileDialog::getSaveFileName(this, "Save File");
     else
         filename = filePath;
 
@@ -214,6 +214,7 @@ void NoteTree::openFileLocation() {
      Doesn't have Linux support because file browsers are funny. That final catch at the end is "good enough" for Linux users.
      TODO: add something in for GNOME (nautilus) or KDE (dolphin).
      */
+    if (filePath.isEmpty()) { return; }
     QString path = filePath;
     QFileInfo info(path);
     #if defined(Q_OS_WIN)
@@ -243,11 +244,23 @@ void NoteTree::openFileLocation() {
 
 void NoteTree::openFile(QString filename) {
     if (filename.isEmpty()) {
-        filename = QFileDialog::getOpenFileName(this, "Open File", "notes/");
+        filename = QFileDialog::getOpenFileName(this, "Open File");
         if (filename.isEmpty()) { return; }
     }
-    if (closeFile()) { return; }
     QFile file(filename);
+    if (!file.exists()) {
+        QMessageBox fileNotFound;
+        fileNotFound.setText("The file that was attempted to open does not exist.");
+        fileNotFound.setInformativeText(filename + " could not be found.");
+        fileNotFound.setIcon(QMessageBox::Critical);
+        fileNotFound.exec();
+        if (recentItems.contains(filename)) {
+            recentItems.removeAll(filename); // Removes all instances of that filename from recent items, the most likely place to get deleted files.
+            updateRecentItemsMenu();
+        }
+        return;
+    }
+    if (closeFile()) { return; }
     QFileInfo fileInfo(file.fileName());
     filePath = filename;
     updateRecentItemsMenu();
