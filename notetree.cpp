@@ -181,7 +181,13 @@ void NoteTree::saveFile(bool saveAs) {
     else
         filename = filePath;
 
+    if (saveAs)
+        recentItems.insert(0, filePath);
+
     filePath = filename;
+
+    if (saveAs)
+        updateRecentItemsMenu();
 
     QFile file(filename);
     QFileInfo fileInfo(file.fileName());
