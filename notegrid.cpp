@@ -8,8 +8,9 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
     stack = new QListWidget(this);
     stack->setMovement(QListView::Free);
     stack->setWordWrap(true);
+    stack->setDragDropMode(QAbstractItemView::InternalMove);
     stackFontSize = notetree->settings->value("view/stackFont", 12).toInt();
-    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
+    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }"); // TODO: make this A. not stupid long and B. not copy-pasted in 3 different places.
 
     isDirty = false;
     
@@ -48,19 +49,19 @@ void NoteGrid::increaseFontSize() {
     stackFontSize += 2;
     if (stackFontSize >= 100) { stackFontSize -= 2; return; }
     notetree->settings->setValue("view/stackFont", stackFontSize);
-    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
+    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }");
 }
 
 void NoteGrid::decreaseFontSize() {
     stackFontSize -= 2;
     if (stackFontSize <= 0) { stackFontSize += 2; return; }
     notetree->settings->setValue("view/stackFont", stackFontSize);
-    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
+    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }");
 }
 
 void NoteGrid::resetZoom() {
     stackFontSize = 12;
-    stack->setStyleSheet("background-color: transparent; font-size: " + QString::number(stackFontSize) + "px;");
+    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }");
 }
 
 void NoteGrid::copyItem() {
