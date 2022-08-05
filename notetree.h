@@ -47,6 +47,9 @@ class NoteTree : public QMainWindow {
         void openRecentFile();
         void clearRecentItems();
         void newWindow();
+        void addToFavorites();
+        void openFavorite(QString file);
+        void removeFavorite(QString file);
     protected:
         void closeEvent(QCloseEvent *event);
     private:
@@ -55,14 +58,18 @@ class NoteTree : public QMainWindow {
         QString visibleFilePath(QString path = nullptr);
         bool checkDirty();
         void updateRecentItemsMenu(bool setSettingsList = true);
+        void updateFavoritesMenu(bool setSettingsList = true);
         QString filePath;
         NoteGrid* notegrid;
         QAction* view_statusbar;
         QAction* statusbar_showcount;
         QAction* statusbar_showpath;
         QAction* clear_recent_items;
+        QAction* add_to_favorites;
         QMenu *recentItemsGroup;
+        QMenu *favorites_menu;
         QStringList recentItems;
+        QStringList favorites;
 
         QMessageBox aboutwindow;
         QMessageBox fileNotFound;

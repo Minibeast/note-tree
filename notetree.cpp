@@ -64,6 +64,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     open_file_location->setShortcut(QKeySequence("Ctrl+Shift+O"));
     auto *new_window = new QAction("New Window", this);
     new_window->setShortcut(QKeySequence(QKeySequence::New));
+    add_to_favorites = new QAction("Add to Favorites");
+    add_to_favorites->setShortcut(QKeySequence("Ctrl+Shift+F"));
 
     filePath = "";
     this->updateWindowTitle();
@@ -71,6 +73,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     QMenu *file = menuBar()->addMenu("&File");
     QMenu *edit = menuBar()->addMenu("&Edit");
     QMenu *view = menuBar()->addMenu("&View");
+    favorites_menu = menuBar()->addMenu("&Favorites");
     QMenu *help = menuBar()->addMenu("&Help");
 
     file->addAction(new_window);
@@ -106,6 +109,9 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     view->addAction(zoom_out);
     view->addAction(reset_zoom);
 
+    favorites = settings->value("files/favorites").toStringList();
+    updateFavoritesMenu(false);
+
     help->addAction(about_item);
 
     setCentralWidget(notegrid);
@@ -134,6 +140,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(statusbar_showcount, SIGNAL(triggered()), this, SLOT(toggleStatusBar()));
     connect(open_file_location, SIGNAL(triggered()), this, SLOT(openFileLocation()));
     connect(new_window, SIGNAL(triggered()), this, SLOT(newWindow()));
+    connect(add_to_favorites, SIGNAL(triggered()), this, SLOT(addToFavorites()));
 }
 
 void NoteTree::newWindow() {
@@ -168,6 +175,47 @@ void NoteTree::updateRecentItemsMenu(bool setSettingsList) {
     recentItemsGroup->addAction(clear_recent_items);
     if (setSettingsList)
         settings->setValue("files/recentItems", recentItems);
+}
+
+void NoteTree::updateFavoritesMenu(bool setSettingsList) {
+    favorites_menu->clear();
+    favorites.removeDuplicates();
+    favorites_menu->addAction(add_to_favorites);
+    favorites_menu->addSeparator();
+    for (int i = 0; i < favorites.length(); i++) {
+        auto *action = new QMenu(visibleFilePath(favorites[i]));
+        auto *open_action = new QAction("Open File");
+        if (i < 9)
+            open_action->setShortcut(QKeySequence("Ctrl+Shift+" + QString::number(i + 1)));
+        else if (i == 9)
+            open_action->setShortcut(QKeySequence("Ctrl+Shift+0"));
+        connect(open_action, &QAction::triggered, this, [this, i]{ openFavorite(favorites[i]); });
+        auto *remove_action = new QAction("Remove from Favorites");
+        connect(remove_action, &QAction::triggered, this, [this, i]{ removeFavorite(favorites[i]); });
+        action->addAction(open_action);
+        action->addAction(remove_action);
+        favorites_menu->addMenu(action);
+    }
+
+    if (setSettingsList)
+        settings->setValue("files/favorites", favorites);
+}
+
+void NoteTree::addToFavorites() {
+    if (filePath.isEmpty()) return;
+    if (favorites.contains(filePath)) return;
+    favorites.append(filePath);
+    updateFavoritesMenu();
+}
+
+void NoteTree::openFavorite(QString file) {
+    if (file == filePath) return;
+    openFile(file);
+}
+
+void NoteTree::removeFavorite(QString file) {
+    favorites.removeAll(file);
+    updateFavoritesMenu();
 }
 
 void NoteTree::clearRecentItems() {
