@@ -36,7 +36,12 @@ class NoteGrid : public QWidget {
         void increaseFontSize();
         void decreaseFontSize();
         void resetZoom();
+        void increasePaddingSize();
+        void decreasePaddingSize();
+        void resetPadding();
     private:
         QListWidget* stack;
         int stackFontSize;
+        int paddingSize;
+        QString style;
 };

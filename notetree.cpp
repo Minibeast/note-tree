@@ -66,6 +66,9 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     new_window->setShortcut(QKeySequence(QKeySequence::New));
     add_to_favorites = new QAction("Add to Favorites");
     add_to_favorites->setShortcut(QKeySequence("Ctrl+Shift+F"));
+    auto *padding_in = new QAction("Increase Text Padding");
+    auto *padding_out = new QAction("Decrease Text Padding");
+    auto *padding_reset = new QAction("Reset Text Padding");
 
     filePath = "";
     this->updateWindowTitle();
@@ -104,6 +107,11 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     statusbar_menu->addAction(statusbar_showpath);
     statusbar_menu->addAction(statusbar_showcount);
 
+    QMenu *padding_menu = view->addMenu("Text Padding");
+    padding_menu->addAction(padding_in);
+    padding_menu->addAction(padding_out);
+    padding_menu->addAction(padding_reset);
+
     view->addSeparator();
     view->addAction(zoom_in);
     view->addAction(zoom_out);
@@ -141,6 +149,9 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(open_file_location, SIGNAL(triggered()), this, SLOT(openFileLocation()));
     connect(new_window, SIGNAL(triggered()), this, SLOT(newWindow()));
     connect(add_to_favorites, SIGNAL(triggered()), this, SLOT(addToFavorites()));
+    connect(padding_in, &QAction::triggered, notegrid, &NoteGrid::increasePaddingSize);
+    connect(padding_out, &QAction::triggered, notegrid, &NoteGrid::decreasePaddingSize);
+    connect(padding_reset, &QAction::triggered, notegrid, &NoteGrid::resetPadding);
 }
 
 void NoteTree::newWindow() {

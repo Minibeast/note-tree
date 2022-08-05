@@ -2,6 +2,7 @@
 #include "notetree.h"
 
 NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
+    style = "QListWidget { background-color: transparent; font-size: %1px; } QListWidget::item { padding-bottom: %2px; }";
     notetree = reinterpret_cast<NoteTree*>(parent);
     textField = new TextWidget(this);
     auto *grid = new QGridLayout(this);
@@ -10,7 +11,8 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
     stack->setWordWrap(true);
     stack->setDragDropMode(QAbstractItemView::InternalMove);
     stackFontSize = notetree->settings->value("view/stackFont", 12).toInt();
-    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }"); // TODO: make this A. not stupid long and B. not copy-pasted in 3 different places.
+    paddingSize = notetree->settings->value("view/paddingSize", 2).toInt();
+    stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 
     isDirty = false;
     
@@ -49,19 +51,40 @@ void NoteGrid::increaseFontSize() {
     stackFontSize += 2;
     if (stackFontSize >= 100) { stackFontSize -= 2; return; }
     notetree->settings->setValue("view/stackFont", stackFontSize);
-    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }");
+    stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 }
 
 void NoteGrid::decreaseFontSize() {
     stackFontSize -= 2;
     if (stackFontSize <= 0) { stackFontSize += 2; return; }
     notetree->settings->setValue("view/stackFont", stackFontSize);
-    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }");
+    stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 }
 
 void NoteGrid::resetZoom() {
     stackFontSize = 12;
-    stack->setStyleSheet("QListWidget { background-color: transparent; font-size: " + QString::number(stackFontSize) + "px; } QListWidget::item { padding-bottom: 6px; }");
+    notetree->settings->setValue("view/stackFont", stackFontSize);
+    stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
+}
+
+void NoteGrid::increasePaddingSize() {
+    paddingSize += 2;
+    if (paddingSize >= 50) { paddingSize -= 2; return; }
+    notetree->settings->setValue("view/paddingSize", paddingSize);
+    stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
+}
+
+void NoteGrid::decreasePaddingSize() {
+    paddingSize -= 2;
+    if (paddingSize <= 0) { paddingSize += 2; return; }
+    notetree->settings->setValue("view/paddingSize", paddingSize);
+    stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
+}
+
+void NoteGrid::resetPadding() {
+    paddingSize = 2;
+    notetree->settings->setValue("view/paddingSize", paddingSize);
+    stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 }
 
 void NoteGrid::copyItem() {
@@ -94,6 +117,7 @@ void NoteGrid::deleteItem() {
         notetree->markSaved();
         delete item; // Qt documentation warnings you to destroy item to effectively remove it from QListWidget.
     }
+    notetree->updateStatusBar();
 }
 
 void NoteGrid::clearList() {

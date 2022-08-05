@@ -24,4 +24,5 @@ class TextWidget : public QTextEdit {
     private:
         NoteGrid* notegrid;
         int textFontSize;
+        QString style;
 };
