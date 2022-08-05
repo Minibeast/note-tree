@@ -10,7 +10,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
 
 
     aboutwindow.setText("About Note Tree");
-    aboutwindow.setInformativeText("Git Commit: " + QString(STRINGIFY(GIT_VERSION)) + "\nOS: " + QSysInfo::kernelType() + " " + QSysInfo::kernelVersion() + "\n\nMade by Mini / Amy");
+    aboutwindow.setInformativeText("Git Commit: " + QString(STRINGIFY(GIT_VERSION)) + "\nOS: " + QSysInfo::prettyProductName() + " (" + QSysInfo::currentCpuArchitecture() + ")\n\nMade by Mini / Amy");
     fileNotFound.setText("The file that was attempted to open does not exist.");
     fileNotFound.setIcon(QMessageBox::Critical);
     saveChanges.setText("The document has been modified.");

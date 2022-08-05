@@ -19,7 +19,9 @@ SOURCES += main.cpp notegrid.cpp notetree.cpp textwidget.cpp
 
 QT += widgets
 
-DEFINES += "GIT_VERSION='$(shell git describe --always)'"
+unix:!macx {
+	DEFINES += "GIT_VERSION='$(shell git describe --always)'"
+}
 
 QMAKE_CFLAGS += -g
 QMAKE_CXXFLAGS += -g
