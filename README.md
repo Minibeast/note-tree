@@ -9,10 +9,11 @@ A simple C++ note taking application written with Qt5.
 - Open the project.
 
 ### macOS
-- Install and configure XCode.
+- Install and configure Xcode.
 - Download Qt5 (`brew install qt5`).
 - At the project root, run `qmake -spec macx-xcode`.
 - Open the project.
+- Building the project with Xcode will still work, but running the `macos-xcodebuild.sh` script will add the git version in the about menu correctly.
 
 ### Linux
 - Download Qt5 from the package manager of the distribution.
