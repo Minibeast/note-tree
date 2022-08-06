@@ -23,5 +23,12 @@ unix:!macx {
 	DEFINES += "GIT_VERSION='$(shell git describe --always)'"
 }
 
-QMAKE_CFLAGS += -g
-QMAKE_CXXFLAGS += -g
+win32 {
+	# https://stackoverflow.com/a/24010395
+	DEFINES += GIT_VERSION=$$system(git describe --always)
+}
+
+!win32 {
+	QMAKE_CFLAGS += -g
+	QMAKE_CXXFLAGS += -g
+}
