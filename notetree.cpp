@@ -87,10 +87,9 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     clear_recent_items = new QAction("Clear Recent Items");
     connect(clear_recent_items, SIGNAL(triggered()), this, SLOT(clearRecentItems()));
     updateRecentItemsMenu(false); // No reason to set the list when nothing gets modified.
-    file->addAction(new_file);
-    file->addSeparator();
     file->addAction(save_file);
     file->addAction(save_file_as);
+    file->addAction(new_file);
     file->addSeparator();
     file->addAction(quit);
 
