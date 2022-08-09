@@ -18,6 +18,8 @@ void TextWidget::focusInEvent(QFocusEvent* event) {
 void TextWidget::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Return && !((event->modifiers() & Qt::ShiftModifier) == Qt::ShiftModifier))
         notegrid->addTextToList();
+    else if (getEditStyle() && event->key() == Qt::Key_Escape)
+        notegrid->exitEdit();
     else
         QTextEdit::keyPressEvent(event);
 }
@@ -39,4 +41,18 @@ void TextWidget::decreaseFontSize() {
 void TextWidget::resetZoom() {
     textFontSize = 12;
     this->setStyleSheet(style.arg(QString::number(textFontSize)));
+}
+
+void TextWidget::setEditStyle(bool setColor) {
+    if (setColor) {
+        style = "font-size: %1px; background-color: %2";
+        this->setStyleSheet(style.arg(QString::number(textFontSize)).arg(notegrid->notetree->settings->value("edit/editcolor", "#696db8").toString()));
+    } else {
+        style = "font-size: %1px;";
+        this->setStyleSheet(style.arg(QString::number(textFontSize)));
+    }
+}
+
+bool TextWidget::getEditStyle() {
+    return style.contains("background-color");
 }

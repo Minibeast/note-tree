@@ -69,6 +69,9 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     auto *padding_in = new QAction("Increase Text Padding");
     auto *padding_out = new QAction("Decrease Text Padding");
     auto *padding_reset = new QAction("Reset Text Padding");
+    auto *edit_item = new QAction("Edit Item");
+    edit_item->setShortcut(QKeySequence("Ctrl+E"));
+    auto *set_edit_color = new QAction("Set Edit Color");
 
     filePath = "";
     this->updateWindowTitle();
@@ -96,6 +99,9 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     edit->addAction(cut);
     edit->addAction(copy);
     edit->addAction(paste);
+    edit->addSeparator();
+    edit->addAction(edit_item);
+    edit->addAction(set_edit_color);
     edit->addSeparator();
     edit->addAction(new_line);
     edit->addAction(delete_item);
@@ -151,6 +157,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(padding_in, &QAction::triggered, notegrid, &NoteGrid::increasePaddingSize);
     connect(padding_out, &QAction::triggered, notegrid, &NoteGrid::decreasePaddingSize);
     connect(padding_reset, &QAction::triggered, notegrid, &NoteGrid::resetPadding);
+    connect(edit_item, &QAction::triggered, notegrid, &NoteGrid::editItem);
+    connect(set_edit_color, SIGNAL(triggered()), this, SLOT(changeEditColor()));
 }
 
 void NoteTree::newWindow() {
@@ -226,6 +234,14 @@ void NoteTree::openFavorite(QString file) {
 void NoteTree::removeFavorite(QString file) {
     favorites.removeAll(file);
     updateFavoritesMenu();
+}
+
+void NoteTree::changeEditColor() {
+    QString text = QInputDialog::getText(this,"Change 'Edit Item' Background","Any valid color in CSS.", QLineEdit::Normal, settings->value("edit/editcolor", "#696db8").toString());
+    if (text.isEmpty()) return;
+    settings->setValue("edit/editcolor", text);
+    if (notegrid->textField->getEditStyle())
+        notegrid->textField->setEditStyle(true);
 }
 
 void NoteTree::clearRecentItems() {

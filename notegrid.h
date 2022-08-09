@@ -22,6 +22,7 @@ class NoteGrid : public QWidget {
         void addItemToList(QString text);
         void unselectList();
         void clearList();
+        void exitEdit();
         QList<QString> getList();
         int getListCount();
         bool isDirty;
@@ -39,8 +40,13 @@ class NoteGrid : public QWidget {
         void increasePaddingSize();
         void decreasePaddingSize();
         void resetPadding();
+        void editItem();
     private:
+        int getItemFromStack(QListWidgetItem *item);
         QListWidget* stack;
+        int listIndex;
+        QString cachedText;
+        QString originalText;
         int stackFontSize;
         int paddingSize;
         QString style;

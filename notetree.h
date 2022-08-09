@@ -23,6 +23,7 @@
 #include <QDesktopServices>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QInputDialog>
 
 
 class NoteTree : public QMainWindow {
@@ -50,6 +51,7 @@ class NoteTree : public QMainWindow {
         void addToFavorites();
         void openFavorite(QString file);
         void removeFavorite(QString file);
+        void changeEditColor();
     protected:
         void closeEvent(QCloseEvent *event);
     private:

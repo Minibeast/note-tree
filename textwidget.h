@@ -14,6 +14,8 @@ class TextWidget : public QTextEdit {
 
     public:
         TextWidget(QWidget *parent = nullptr);
+        void setEditStyle(bool setColor);
+        bool getEditStyle();
     public slots:
         void increaseFontSize();
         void decreaseFontSize();

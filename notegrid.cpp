@@ -15,6 +15,7 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
     stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 
     isDirty = false;
+    listIndex = -1;
     
     grid->addWidget(stack, 0, 0);
     grid->addWidget(textField, 1, 0);
@@ -31,11 +32,26 @@ QString NoteGrid::getTextFieldContents() {
 
 void NoteGrid::addItemToList(QString text) {
     text = text.trimmed();
-    if (text.isEmpty()) { return; }
+    if (text.isEmpty()) {
+        if (textField->getEditStyle()) {
+            listIndex = -1;
+            textField->setEditStyle(false);
+            cachedText = nullptr;
+            clearTextFieldContents();
+        }
+        return;
+    }
     isDirty = true;
     notetree->markSaved();
     auto *item = new QListWidgetItem(text);
-    stack->addItem(item);
+    if (listIndex != -1) {
+        stack->insertItem(listIndex, item);
+        listIndex = -1;
+        textField->setEditStyle(false);
+        cachedText = nullptr;
+    }
+    else
+        stack->addItem(item);
     notetree->updateStatusBar();
 }
 
@@ -140,4 +156,39 @@ void NoteGrid::addTextToList() {
     auto text = this->getTextFieldContents();
     this->addItemToList(text);
     this->clearTextFieldContents();
+}
+
+int NoteGrid::getItemFromStack(QListWidgetItem *item) {
+    for (int i = 0; i < stack->count(); i++)
+        if (stack->item(i) == item)
+            return i;
+    return -1;
+}
+
+void NoteGrid::editItem() {
+    if (textField->getEditStyle() && !cachedText.isNull())
+        addItemToList(cachedText);
+    auto items = stack->selectedItems();
+    if (items.length() > 0) {
+        auto item = items[0];
+        listIndex = getItemFromStack(item);
+        if (listIndex != -1) { // This should NEVER fail, but if it does...
+            originalText = getTextFieldContents();
+            textField->setText(item->text());
+            cachedText = item->text();
+            deleteItem();
+            textField->setEditStyle(true);
+        }
+    }
+}
+
+void NoteGrid::exitEdit() {
+    if (!cachedText.isNull())
+        addItemToList(cachedText);
+    clearTextFieldContents();
+    if (!originalText.isEmpty()) {
+        textField->setText(originalText);
+        originalText = nullptr;
+    }
+    textField->setEditStyle(false);
 }
