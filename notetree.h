@@ -52,6 +52,7 @@ class NoteTree : public QMainWindow {
         void openFavorite(QString file);
         void removeFavorite(QString file);
         void changeEditColor();
+        void toggleAlwaysOnTop();
     protected:
         void closeEvent(QCloseEvent *event);
     private:
@@ -68,6 +69,7 @@ class NoteTree : public QMainWindow {
         QAction* statusbar_showpath;
         QAction* clear_recent_items;
         QAction* add_to_favorites;
+        QAction* always_on_top_cbox;
         QMenu *recentItemsGroup;
         QMenu *favorites_menu;
         QStringList recentItems;

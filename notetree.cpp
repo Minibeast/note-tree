@@ -72,6 +72,10 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     auto *edit_item = new QAction("Edit Item");
     edit_item->setShortcut(QKeySequence("Ctrl+E"));
     auto *set_edit_color = new QAction("Set Edit Color");
+    always_on_top_cbox = new QAction("Always on Top");
+    always_on_top_cbox->setCheckable(true);
+    always_on_top_cbox->setChecked(settings->value("view/alwaysontop", false).toBool());
+    toggleAlwaysOnTop();
 
     filePath = "";
     this->updateWindowTitle();
@@ -117,6 +121,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     padding_menu->addAction(padding_out);
     padding_menu->addAction(padding_reset);
 
+    view->addAction(always_on_top_cbox);
     view->addSeparator();
     view->addAction(zoom_in);
     view->addAction(zoom_out);
@@ -159,6 +164,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(padding_reset, &QAction::triggered, notegrid, &NoteGrid::resetPadding);
     connect(edit_item, &QAction::triggered, notegrid, &NoteGrid::editItem);
     connect(set_edit_color, SIGNAL(triggered()), this, SLOT(changeEditColor()));
+    connect(always_on_top_cbox, SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
 }
 
 void NoteTree::newWindow() {
@@ -266,6 +272,19 @@ void NoteTree::toggleStatusBar() {
     settings->setValue("view/statusbar", view_statusbar->isChecked());
     settings->setValue("view/statusbar_showpath", statusbar_showpath->isChecked());
     settings->setValue("view/statusbar_showcount", statusbar_showcount->isChecked());
+}
+
+void NoteTree::toggleAlwaysOnTop() {
+    Qt::WindowFlags flags;
+    flags = this->windowFlags();
+    this->hide();
+    if (always_on_top_cbox->isChecked())
+        this->setWindowFlags(flags | Qt::WindowStaysOnTopHint);
+    else
+        this->setWindowFlags(flags & ~Qt::WindowStaysOnTopHint);
+    this->show();
+
+    settings->setValue("view/alwaysontop", always_on_top_cbox->isChecked());
 }
 
 QString NoteTree::visibleFilePath(QString path) {
