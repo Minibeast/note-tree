@@ -19,16 +19,20 @@ SOURCES += main.cpp notegrid.cpp notetree.cpp textwidget.cpp
 
 QT += widgets
 
-unix:!macx {
+
+unix {
+	DESTDIR = build
 	DEFINES += "GIT_VERSION='$(shell git describe --always)'"
+	QMAKE_CFLAGS += -g
+	QMAKE_CXXFLAGS += -g
+}
+
+unix:macx {
+	ICON = Assets/AppIcon/notebook.icns
 }
 
 win32 {
 	# https://stackoverflow.com/a/24010395
 	DEFINES += GIT_VERSION=$$system(git describe --always)
-}
-
-!win32 {
-	QMAKE_CFLAGS += -g
-	QMAKE_CXXFLAGS += -g
+	RC_ICONS = Assets/AppIcon/notebook.ico
 }

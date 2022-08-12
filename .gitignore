@@ -13,6 +13,7 @@ notes/
 
 [Dd]ebug/
 [Rr]elease/
+build/
 
 *.bak
 # C++ objects and libs
