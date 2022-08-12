@@ -55,6 +55,9 @@ jobs:
         run: |
           qmake
           make
+          macdeployqt build/Note\ Tree.app -dmg
+          rm -r build/Note\ Tree.app
+          cp Assets/Post-Install/README.md build/
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
