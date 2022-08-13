@@ -32,6 +32,7 @@ jobs:
         run: |
           qmake
           make
+
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
@@ -55,6 +56,9 @@ jobs:
         run: |
           qmake
           make
+      
+      - name: Deploy
+        run: |
           macdeployqt build/Note\ Tree.app -dmg
           rm -r build/Note\ Tree.app
           cp Assets/Post-Install/README.md build/
@@ -83,6 +87,9 @@ jobs:
       
       - name: Build
         run: scripts/win32-msbuild.bat
+
+      - name: Deploy
+        run: windeployqt '.\build\Note Tree.exe' --no-translations --no-angle --no-opengl-sw --release
         
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
@@ -90,4 +97,4 @@ jobs:
           # Artifact name
           name: "windows-x86_64"
           # A file, directory or wildcard pattern that describes what to upload
-          path: "./release/Note Tree.exe"
+          path: "./build"

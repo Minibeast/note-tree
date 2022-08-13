@@ -24,8 +24,7 @@ A simple C++ note taking application written with Qt5.
 ## Download
 Compiled binaries exist for Windows, macOS, and Linux via GitHub actions. Click on the actions tab, then the most recent action to find the releases. Some oddities exist with the executables due to OS-specific bugs, GitHub actions itself, or my own lack of testing tools. These oddities are listed below grouped by platform.
 ### Windows
-- Does not include any Qt libraries, putting the executable file in a folder of another Qt app (Wireshark, OBS, etc) will make it run flawlessly.
-  - Will be fixed soon:tm:.
+- Works flawlessly.
 
 ### macOS
 - App is not code signed in any way, meaning most(?) Macs will refuse to run it, claiming it simply "cannot be opened". Signing the app will fix the problem, but the signature is tied to the machine. Have not invested enough into getting a proper code signature because of how Apple handles code signing.

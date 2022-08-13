@@ -5,6 +5,7 @@ Note Tree.vcxproj*
 
 .DS_Store
 info.plist
+*.rc
 
 notes/
 
