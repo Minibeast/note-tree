@@ -24,6 +24,18 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
     grid->setRowStretch(1, 1);
 
     setLayout(grid);
+    notetree->connect(stack, &QListWidget::itemDoubleClicked, this, &NoteGrid::editItem);
+}
+
+void NoteGrid::checkChanges() {
+    isDirty = savedFile == getList();
+    notetree->markSaved();
+}
+
+void NoteGrid::setSavedFile() {
+    savedFile = getList();
+    isDirty = false;
+    notetree->markSaved();
 }
 
 QString NoteGrid::getTextFieldContents() {
@@ -41,8 +53,7 @@ void NoteGrid::addItemToList(QString text) {
         }
         return;
     }
-    isDirty = true;
-    notetree->markSaved();
+    checkChanges();
     auto *item = new QListWidgetItem(text);
     if (listIndex != -1) {
         stack->insertItem(listIndex, item);
@@ -129,8 +140,7 @@ void NoteGrid::deleteItem() {
     auto items = stack->selectedItems();
     foreach(QListWidgetItem* item, items){
         stack->removeItemWidget(item);
-        isDirty = true;
-        notetree->markSaved();
+        checkChanges();
         delete item; // Qt documentation warnings you to destroy item to effectively remove it from QListWidget.
     }
     notetree->updateStatusBar();

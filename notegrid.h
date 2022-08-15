@@ -28,6 +28,8 @@ class NoteGrid : public QWidget {
         bool isDirty;
         TextWidget* textField;
         NoteTree* notetree;
+        void setSavedFile();
+        void checkChanges();
     public slots:
         void addTextToList();
         void copyItem();
@@ -47,6 +49,7 @@ class NoteGrid : public QWidget {
         int listIndex;
         QString cachedText;
         QString originalText;
+        QList<QString> savedFile;
         int stackFontSize;
         int paddingSize;
         QString style;

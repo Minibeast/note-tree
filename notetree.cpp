@@ -344,8 +344,7 @@ void NoteTree::saveFile(bool saveAs) {
         item = item.replace("\n\n", "\n,\n");
         out << item << Qt::endl << Qt::endl;
     }
-    notegrid->isDirty = false;
-    markSaved();
+    notegrid->setSavedFile();
     settings->setValue("files/lastOpened", filePath);
 }
 
@@ -434,8 +433,7 @@ void NoteTree::openFile(QString filename) {
         item = item.replace("\n,\n", "\n\n");
         notegrid->addItemToList(item);
     }
-    notegrid->isDirty = false;
-    markSaved();
+    notegrid->setSavedFile();
     updateRecentItemsMenu();
     this->updateWindowTitle(fileInfo.fileName());
     settings->setValue("files/lastOpened", filePath);
