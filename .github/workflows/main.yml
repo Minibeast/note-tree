@@ -33,13 +33,25 @@ jobs:
           qmake
           make
 
+      - name: Deploy
+        run: |
+          cd build
+          wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+          chmod u+x linuxdeployqt-continuous-x86_64.AppImage
+          cp ../Assets/AppIcon/notebook.png notebook.png
+          cp ../Assets/Post-Install/note-tree.desktop .
+          ./linuxdeployqt-continuous-x86_64.AppImage Note\ Tree -unsupported-allow-new-glibc -appimage
+          mkdir deploy
+          rm linuxdeployqt-continuous-x86_64.AppImage
+          mv *.AppImage deploy
+
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
           # Artifact name
           name: "linux-x86_64"
           # A file, directory or wildcard pattern that describes what to upload
-          path: "./build"
+          path: "./build/deploy"
   build-macos:
     # The type of runner that the job will run on
     runs-on: macos-latest

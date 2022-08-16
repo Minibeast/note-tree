@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Note Tree
+Comment=A simple C++ note taking application written with Qt5.
+Exec=Note\ Tree
+Icon=/notebook
+Categories=Office;
