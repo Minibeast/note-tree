@@ -25,6 +25,7 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
 
     setLayout(grid);
     notetree->connect(stack, &QListWidget::itemDoubleClicked, this, &NoteGrid::editItem);
+    notetree->connect(stack->model(), &QAbstractItemModel::rowsAboutToBeMoved, this, &NoteGrid::checkChanges);
 }
 
 void NoteGrid::checkChanges() {

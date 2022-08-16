@@ -29,7 +29,6 @@ class NoteGrid : public QWidget {
         TextWidget* textField;
         NoteTree* notetree;
         void setSavedFile();
-        void checkChanges();
     public slots:
         void addTextToList();
         void copyItem();
@@ -43,6 +42,7 @@ class NoteGrid : public QWidget {
         void decreasePaddingSize();
         void resetPadding();
         void editItem();
+        void checkChanges();
     private:
         int getItemFromStack(QListWidgetItem *item);
         QListWidget* stack;
