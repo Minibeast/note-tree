@@ -5,8 +5,12 @@
 
 NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     settings = new QSettings("Mini's Applications", "Note Tree");
-    this->restoreGeometry(settings->value("view/geometry").toByteArray());
+    if (settings->value("view/geometry").isValid())
+        this->restoreGeometry(settings->value("view/geometry").toByteArray());
+    else
+        this->resize(600, 900);
     notegrid = new NoteGrid(this);
+    chalkboard = new Chalkboard(notegrid);
 
 
     aboutwindow.setText("About Note Tree");
@@ -76,6 +80,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     always_on_top_cbox->setCheckable(true);
     always_on_top_cbox->setChecked(settings->value("view/alwaysontop", false).toBool());
     toggleAlwaysOnTop();
+    auto *show_chalkboard = new QAction("Show Chalkboard");
+    show_chalkboard->setShortcut(QKeySequence("Ctrl+Shift+N"));
 
     filePath = "";
     this->updateWindowTitle();
@@ -94,6 +100,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     clear_recent_items = new QAction("Clear Recent Items");
     connect(clear_recent_items, SIGNAL(triggered()), this, SLOT(clearRecentItems()));
     updateRecentItemsMenu(false); // No reason to set the list when nothing gets modified.
+    file->addAction(show_chalkboard);
     file->addAction(save_file);
     file->addAction(save_file_as);
     file->addAction(new_file);
@@ -165,6 +172,11 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(edit_item, &QAction::triggered, notegrid, &NoteGrid::editItem);
     connect(set_edit_color, SIGNAL(triggered()), this, SLOT(changeEditColor()));
     connect(always_on_top_cbox, SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
+    connect(show_chalkboard, SIGNAL(triggered()), this, SLOT(showChalkboard()));
+}
+
+void NoteTree::showChalkboard() {
+    chalkboard->show();
 }
 
 void NoteTree::newWindow() {
@@ -495,6 +507,8 @@ void NoteTree::closeEvent(QCloseEvent *event) {
         event->ignore();
     else {
         settings->setValue("view/geometry", saveGeometry());
+        if (chalkboard->isVisible())
+            chalkboard->close();
         QMainWindow::closeEvent(event);
     }
 }

@@ -5,7 +5,6 @@ int main(int argc, char *argv[]) {
 
     NoteTree window;
 
-    window.resize(600, 900);
     window.show();
 
     return app.exec();

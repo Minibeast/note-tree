@@ -1,6 +1,7 @@
 #pragma once
 
 #include "notegrid.h"
+#include "chalkboard.h"
 
 #include <QMainWindow>
 #include <QApplication>
@@ -35,8 +36,9 @@ class NoteTree : public QMainWindow {
         void markSaved();
         void updateStatusBar();
         QSettings* settings;
-   private slots:
+   public slots:
         void quitMainWindow();
+   private slots:
         void saveFileSlot();
         void saveAsFileSlot();
         void openFile(QString filename = nullptr);
@@ -53,6 +55,7 @@ class NoteTree : public QMainWindow {
         void removeFavorite(QString file);
         void changeEditColor();
         void toggleAlwaysOnTop();
+        void showChalkboard();
     protected:
         void closeEvent(QCloseEvent *event);
     private:
@@ -74,6 +77,7 @@ class NoteTree : public QMainWindow {
         QMenu *favorites_menu;
         QStringList recentItems;
         QStringList favorites;
+        Chalkboard *chalkboard;
 
         QMessageBox aboutwindow;
         QMessageBox fileNotFound;
