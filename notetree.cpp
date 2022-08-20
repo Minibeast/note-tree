@@ -403,7 +403,12 @@ void NoteTree::openFileLocation() {
 
 void NoteTree::openFile(QString filename) {
     if (filename.isEmpty()) {
-        filename = QFileDialog::getOpenFileName(this, "Open File");
+        if (filePath.isEmpty())
+            filename = QFileDialog::getOpenFileName(this, "Open File", QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+        else {
+            QDir d = QFileInfo(filePath).absoluteDir();
+            filename = QFileDialog::getOpenFileName(this, "Open File", d.absolutePath());
+        }
         if (filename.isEmpty()) { return; }
     }
     QFile file(filename);
