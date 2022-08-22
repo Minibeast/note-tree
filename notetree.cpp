@@ -9,6 +9,8 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
         this->restoreGeometry(settings->value("view/geometry").toByteArray());
     else
         this->resize(600, 900);
+
+    setAcceptDrops(true);
     notegrid = new NoteGrid(this);
     chalkboard = new Chalkboard(notegrid);
 
@@ -173,6 +175,20 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(set_edit_color, SIGNAL(triggered()), this, SLOT(changeEditColor()));
     connect(always_on_top_cbox, SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
     connect(show_chalkboard, SIGNAL(triggered()), this, SLOT(showChalkboard()));
+}
+
+void NoteTree::dragEnterEvent(QDragEnterEvent *event) {
+    if (event->mimeData()->hasFormat("text/uri-list"))
+        event->acceptProposedAction();
+}
+
+void NoteTree::dropEvent(QDropEvent *event) {
+    const QMimeData *mimeData = event->mimeData();
+    if (mimeData->hasUrls()) {
+        QList<QUrl> urlList = mimeData->urls();
+        if (urlList.size() > 0)
+            openFile(urlList[0].toString().replace("file://", ""));
+    }
 }
 
 void NoteTree::showChalkboard() {

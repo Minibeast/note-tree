@@ -25,6 +25,7 @@
 #include <QProcess>
 #include <QStandardPaths>
 #include <QInputDialog>
+#include <QMimeData>
 
 
 class NoteTree : public QMainWindow {
@@ -58,6 +59,8 @@ class NoteTree : public QMainWindow {
         void showChalkboard();
     protected:
         void closeEvent(QCloseEvent *event);
+        void dropEvent(QDropEvent *event);
+        void dragEnterEvent(QDragEnterEvent *event);
     private:
         void saveFile(bool saveAs);
         void updateWindowTitle(QString title = QString());
