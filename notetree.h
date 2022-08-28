@@ -57,6 +57,8 @@ class NoteTree : public QMainWindow {
         void changeEditColor();
         void toggleAlwaysOnTop();
         void showChalkboard();
+        void addDirectoryToFavorites();
+        void openFolderLocation(QString folder);
     protected:
         void closeEvent(QCloseEvent *event);
         void dropEvent(QDropEvent *event);
@@ -75,6 +77,7 @@ class NoteTree : public QMainWindow {
         QAction* statusbar_showpath;
         QAction* clear_recent_items;
         QAction* add_to_favorites;
+        QAction* add_folder_to_favorites;
         QAction* always_on_top_cbox;
         QMenu *recentItemsGroup;
         QMenu *favorites_menu;

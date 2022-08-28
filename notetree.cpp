@@ -72,6 +72,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     new_window->setShortcut(QKeySequence(QKeySequence::New));
     add_to_favorites = new QAction("Add to Favorites");
     add_to_favorites->setShortcut(QKeySequence("Ctrl+Shift+F"));
+    add_folder_to_favorites = new QAction("Add Folder to Favorites");
     auto *padding_in = new QAction("Increase Text Padding");
     auto *padding_out = new QAction("Decrease Text Padding");
     auto *padding_reset = new QAction("Reset Text Padding");
@@ -168,6 +169,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(open_file_location, SIGNAL(triggered()), this, SLOT(openFileLocation()));
     connect(new_window, SIGNAL(triggered()), this, SLOT(newWindow()));
     connect(add_to_favorites, SIGNAL(triggered()), this, SLOT(addToFavorites()));
+    connect(add_folder_to_favorites, SIGNAL(triggered()), this, SLOT(addDirectoryToFavorites()));
     connect(padding_in, &QAction::triggered, notegrid, &NoteGrid::increasePaddingSize);
     connect(padding_out, &QAction::triggered, notegrid, &NoteGrid::decreasePaddingSize);
     connect(padding_reset, &QAction::triggered, notegrid, &NoteGrid::resetPadding);
@@ -233,19 +235,43 @@ void NoteTree::updateFavoritesMenu(bool setSettingsList) {
     favorites_menu->clear();
     favorites.removeDuplicates();
     favorites_menu->addAction(add_to_favorites);
+    favorites_menu->addAction(add_folder_to_favorites);
     favorites_menu->addSeparator();
     for (int i = 0; i < favorites.length(); i++) {
         auto *action = new QMenu(visibleFilePath(favorites[i]));
-        auto *open_action = new QAction("Open File");
-        if (i < 9)
-            open_action->setShortcut(QKeySequence("Ctrl+Shift+" + QString::number(i + 1)));
-        else if (i == 9)
-            open_action->setShortcut(QKeySequence("Ctrl+Shift+0"));
-        connect(open_action, &QAction::triggered, this, [this, i]{ openFavorite(favorites[i]); });
-        auto *remove_action = new QAction("Remove from Favorites");
-        connect(remove_action, &QAction::triggered, this, [this, i]{ removeFavorite(favorites[i]); });
-        action->addAction(open_action);
-        action->addAction(remove_action);
+        QFileInfo f(favorites[i]);
+        if (f.isDir()) {
+            auto *open_action = new QAction("Open Folder");
+            if (i < 9)
+                open_action->setShortcut(QKeySequence("Ctrl+Shift+" + QString::number(i + 1)));
+            else if (i == 9)
+                open_action->setShortcut(QKeySequence("Ctrl+Shift+0"));
+            connect(open_action, &QAction::triggered, this, [this, i]{ openFolderLocation(favorites[i]); });
+            auto *remove_action = new QAction("Remove from Favorites");
+            connect(remove_action, &QAction::triggered, this, [this, i]{ removeFavorite(favorites[i]); });
+            action->addAction(open_action);
+            action->addAction(remove_action);
+            action->addSeparator();
+            QDir directory(favorites[i]);
+            QStringList files = directory.entryList(QStringList() << "*.txt" << "*.md", QDir::Files);
+            foreach (QString filename, files) {
+                auto *file = new QAction(visibleFilePath(filename));
+                QString tempFilePath = directory.absolutePath() + QDir::separator() + filename;
+                connect(file, &QAction::triggered, this, [this, tempFilePath]{ openFavorite(tempFilePath); });
+                action->addAction(file);
+            }
+        } else if (f.isFile()) {
+            auto *open_action = new QAction("Open File");
+            if (i < 9)
+                open_action->setShortcut(QKeySequence("Ctrl+Shift+" + QString::number(i + 1)));
+            else if (i == 9)
+                open_action->setShortcut(QKeySequence("Ctrl+Shift+0"));
+            connect(open_action, &QAction::triggered, this, [this, i]{ openFavorite(favorites[i]); });
+            auto *remove_action = new QAction("Remove from Favorites");
+            connect(remove_action, &QAction::triggered, this, [this, i]{ removeFavorite(favorites[i]); });
+            action->addAction(open_action);
+            action->addAction(remove_action);
+        }
         favorites_menu->addMenu(action);
     }
 
@@ -257,6 +283,14 @@ void NoteTree::addToFavorites() {
     if (filePath.isEmpty()) return;
     if (favorites.contains(filePath)) return;
     favorites.append(filePath);
+    updateFavoritesMenu();
+}
+
+void NoteTree::addDirectoryToFavorites() {
+    QString dirPath = QFileDialog::getExistingDirectory(this, "Open Directory", QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+    if (dirPath.isEmpty()) return;
+    if (favorites.contains(dirPath)) return;
+    favorites.append(dirPath);
     updateFavoritesMenu();
 }
 
@@ -382,6 +416,11 @@ void NoteTree::saveFileSlot() {
 
 void NoteTree::saveAsFileSlot() {
     saveFile(true);
+}
+
+void NoteTree::openFolderLocation(QString folder) {
+    if (folder.isEmpty()) { return; }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
 }
 
 void NoteTree::openFileLocation() {
