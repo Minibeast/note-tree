@@ -79,6 +79,7 @@ void NoteGrid::addItemToList(QString text) {
     }
     else
         stack->addItem(item);
+    stack->scrollToItem(item);
     notetree->updateStatusBar();
 }
 
