@@ -56,6 +56,21 @@ void NoteGrid::addItemToList(QString text) {
     }
     checkChanges();
     auto *item = new QListWidgetItem(text);
+
+    if (text.startsWith("# ")) {
+        QFont font = item->font();
+        font.setWeight(QFont::Bold);
+        font.setPointSize(13 + (stackFontSize / 2) + 10);
+        item->setFont(font);
+        item->setText(text.mid(2));
+    } else if (text.startsWith("## ")) {
+        QFont font = item->font();
+        font.setItalic(true);
+        font.setPointSize(13 + (stackFontSize / 2) + 5);
+        item->setFont(font);
+        item->setText(text.mid(3));
+    }
+
     if (listIndex != -1) {
         stack->insertItem(listIndex, item);
         listIndex = -1;
@@ -67,6 +82,20 @@ void NoteGrid::addItemToList(QString text) {
     notetree->updateStatusBar();
 }
 
+HeaderType NoteGrid::getHeaderTypeFromItem(QListWidgetItem *item) {
+    QFont font = item->font();
+    if (font.weight() == QFont::Bold) { return HeaderType::h1; }
+    else if (font.italic()) { return HeaderType::h2; }
+    else { return HeaderType::None; }
+}
+
+QString NoteGrid::convertItemToPlainText(QListWidgetItem *item) {
+    HeaderType header = getHeaderTypeFromItem(item);
+    if (header == HeaderType::h1) { return "# " + item->text(); }
+    else if (header == HeaderType::h2) { return "## " + item->text(); }
+    else { return item->text(); }
+}
+
 void NoteGrid::clearTextFieldContents() {
     textField->clear();
 }
@@ -75,9 +104,24 @@ void NoteGrid::unselectList() {
     stack->selectionModel()->clear();
 }
 
+void NoteGrid::updateHeaderFontSize() {
+    for (int i = 0; i < stack->count(); i++) {
+        if (getHeaderTypeFromItem(stack->item(i)) == HeaderType::h1) {
+            QFont font = stack->item(i)->font();
+            font.setPointSize(13 + (stackFontSize / 2) + 10);
+            stack->item(i)->setFont(font);
+        } else if (getHeaderTypeFromItem(stack->item(i)) == HeaderType::h2) {
+            QFont font = stack->item(i)->font();
+            font.setPointSize(13 + (stackFontSize / 2) + 5);
+            stack->item(i)->setFont(font);
+        }
+    }
+}
+
 void NoteGrid::increaseFontSize() {
     stackFontSize += 2;
     if (stackFontSize >= 100) { stackFontSize -= 2; return; }
+    updateHeaderFontSize();
     notetree->settings->setValue("view/stackFont", stackFontSize);
     stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 }
@@ -85,12 +129,14 @@ void NoteGrid::increaseFontSize() {
 void NoteGrid::decreaseFontSize() {
     stackFontSize -= 2;
     if (stackFontSize <= 0) { stackFontSize += 2; return; }
+    updateHeaderFontSize();
     notetree->settings->setValue("view/stackFont", stackFontSize);
     stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 }
 
 void NoteGrid::resetZoom() {
     stackFontSize = 12;
+    updateHeaderFontSize();
     notetree->settings->setValue("view/stackFont", stackFontSize);
     stack->setStyleSheet(style.arg(QString::number(stackFontSize), QString::number(paddingSize)));
 }
@@ -119,7 +165,7 @@ void NoteGrid::copyItem() {
     auto items = stack->selectedItems();
     auto clipboard = QGuiApplication::clipboard();
     foreach(QListWidgetItem* item, items){
-        clipboard->setText(item->text());
+        clipboard->setText(convertItemToPlainText(item));
     }
 }
 
@@ -154,7 +200,7 @@ void NoteGrid::clearList() {
 QList<QString> NoteGrid::getList() {
     QList<QString> list;
     for (int i = 0; i < stack->count(); i++) {
-        list.append(stack->item(i)->text());
+        list.append(convertItemToPlainText(stack->item(i)));
     }
     return list;
 }
@@ -185,8 +231,8 @@ void NoteGrid::editItem() {
         listIndex = getItemFromStack(item);
         if (listIndex != -1) { // This should NEVER fail, but if it does...
             originalText = getTextFieldContents();
-            textField->setText(item->text());
-            cachedText = item->text();
+            textField->setText(convertItemToPlainText(item));
+            cachedText = convertItemToPlainText(item);
             deleteItem();
             textField->setEditStyle(true);
         }

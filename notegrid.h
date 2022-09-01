@@ -11,6 +11,10 @@
 
 class NoteTree;
 
+enum class HeaderType {
+    None, h1, h2
+};
+
 class NoteGrid : public QWidget {
     
     Q_OBJECT
@@ -45,6 +49,9 @@ class NoteGrid : public QWidget {
         void checkChanges();
     private:
         int getItemFromStack(QListWidgetItem *item);
+        HeaderType getHeaderTypeFromItem(QListWidgetItem *item);
+        QString convertItemToPlainText(QListWidgetItem *item);
+        void updateHeaderFontSize();
         QListWidget* stack;
         int listIndex;
         QString cachedText;
