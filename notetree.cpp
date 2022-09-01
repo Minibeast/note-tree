@@ -567,6 +567,7 @@ void NoteTree::closeEvent(QCloseEvent *event) {
         event->ignore();
     else {
         settings->setValue("view/geometry", saveGeometry());
+        settings->setValue("files/lastOpened", filePath);
         if (chalkboard->isVisible())
             chalkboard->close();
         QMainWindow::closeEvent(event);
