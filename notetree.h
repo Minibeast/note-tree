@@ -55,6 +55,7 @@ class NoteTree : public QMainWindow {
         void openFavorite(QString file);
         void removeFavorite(QString file);
         void changeEditColor();
+        void createFile(QString folder);
         void toggleAlwaysOnTop();
         void showChalkboard();
         void addDirectoryToFavorites();

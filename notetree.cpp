@@ -246,10 +246,13 @@ void NoteTree::updateFavoritesMenu(bool setSettingsList) {
                 open_action->setShortcut(QKeySequence("Ctrl+Shift+" + QString::number(i + 1)));
             else if (i == 9)
                 open_action->setShortcut(QKeySequence("Ctrl+Shift+0"));
+            auto *create_file = new QAction("Create File");
+            connect(create_file, &QAction::triggered, this, [this, i]{ createFile(favorites[i]); });
             connect(open_action, &QAction::triggered, this, [this, i]{ openFolderLocation(favorites[i]); });
             auto *remove_action = new QAction("Remove from Favorites");
             connect(remove_action, &QAction::triggered, this, [this, i]{ removeFavorite(favorites[i]); });
             action->addAction(open_action);
+            action->addAction(create_file);
             action->addAction(remove_action);
             action->addSeparator();
             QDir directory(favorites[i]);
@@ -310,6 +313,18 @@ void NoteTree::changeEditColor() {
     settings->setValue("edit/editcolor", text);
     if (notegrid->textField->getEditStyle())
         notegrid->textField->setEditStyle(true);
+}
+
+void NoteTree::createFile(QString folder) {
+    QString text = QInputDialog::getText(this, "Create File", "Create a file in the favorited folder.", QLineEdit::Normal);
+    if (text.isEmpty()) return;
+    QDir directory(folder);
+    QString tempFilePath = directory.absolutePath() + QDir::separator() + text;
+    QFile file(tempFilePath);
+    file.open(QIODevice::ReadWrite);
+    file.close();
+    updateFavoritesMenu();
+    openFile(tempFilePath);
 }
 
 void NoteTree::clearRecentItems() {
@@ -473,6 +488,7 @@ void NoteTree::openFile(QString filename) {
         if (recentItems.contains(filename)) {
             recentItems.removeAll(filename); // Removes all instances of that filename from recent items, the most likely place to get deleted files.
             updateRecentItemsMenu();
+            updateFavoritesMenu();
         }
         return;
     }
