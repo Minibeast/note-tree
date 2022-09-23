@@ -60,14 +60,16 @@ class NoteTree : public QMainWindow {
         void showChalkboard();
         void addDirectoryToFavorites();
         void openFolderLocation(QString folder);
+        void changeShortenedPath();
     protected:
         void closeEvent(QCloseEvent *event);
         void dropEvent(QDropEvent *event);
         void dragEnterEvent(QDragEnterEvent *event);
     private:
         void saveFile(bool saveAs);
-        void updateWindowTitle(QString title = QString());
+        void updateWindowTitle();
         QString visibleFilePath(QString path = nullptr);
+        QString shortenedFilePath(QString path = nullptr);
         bool checkDirty();
         void updateRecentItemsMenu(bool setSettingsList = true);
         void updateFavoritesMenu(bool setSettingsList = true);

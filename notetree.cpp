@@ -85,6 +85,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     toggleAlwaysOnTop();
     auto *show_chalkboard = new QAction("Show Chalkboard");
     show_chalkboard->setShortcut(QKeySequence("Ctrl+Shift+N"));
+    auto *change_shortened_path = new QAction("Change Directories Shown");
 
     filePath = "";
     this->updateWindowTitle();
@@ -131,6 +132,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     padding_menu->addAction(padding_out);
     padding_menu->addAction(padding_reset);
 
+    view->addAction(change_shortened_path);
     view->addAction(always_on_top_cbox);
     view->addSeparator();
     view->addAction(zoom_in);
@@ -177,6 +179,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(set_edit_color, SIGNAL(triggered()), this, SLOT(changeEditColor()));
     connect(always_on_top_cbox, SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
     connect(show_chalkboard, SIGNAL(triggered()), this, SLOT(showChalkboard()));
+    connect(change_shortened_path, SIGNAL(triggered()), this, SLOT(changeShortenedPath()));
 }
 
 void NoteTree::dragEnterEvent(QDragEnterEvent *event) {
@@ -375,6 +378,39 @@ QString NoteTree::visibleFilePath(QString path) {
 #endif
 }
 
+QString NoteTree::shortenedFilePath(QString path) {
+    QString checkPath = filePath;
+    if (!path.isNull())
+        checkPath = path;
+
+    QString tempPath = "";
+    QList<QString> tempFolders = QList<QString>();
+    QList<QString> folders = checkPath.split(QDir::separator());
+    QString fileName = folders[folders.length() - 1];
+    int position_iteration = settings->value("view/shortenPath", 0).toInt();
+    if (position_iteration == -1)
+        return checkPath;
+    else {
+        for (int i = folders.length() - 2; i < 0 || position_iteration > 0; i-- && position_iteration--) {
+            tempFolders.append(folders[i]);
+        }
+        // https://stackoverflow.com/a/4078914
+        for(int k = 0; k < (tempFolders.size()/2); k++) tempFolders.swap(k,tempFolders.size()-(1+k));
+        for (QString item : tempFolders) {
+            tempPath += item + QDir::separator();
+        }
+        tempPath = ".../" + tempPath;
+        tempPath += fileName;
+        return tempPath;
+    }
+}
+
+void NoteTree::changeShortenedPath() {
+    int item = QInputDialog::getInt(this, "Change Directories Shown", "-1 to show the full path.", settings->value("view/shortenPath", 0).toInt(), -1);
+    settings->setValue("view/shortenPath", item);
+    updateWindowTitle();
+}
+
 bool NoteTree::closeFile() {
     if (checkDirty()) { return true; }
     notegrid->clearList();
@@ -405,8 +441,7 @@ void NoteTree::saveFile(bool saveAs) {
         updateRecentItemsMenu();
 
     QFile file(filename);
-    QFileInfo fileInfo(file.fileName());
-    this->updateWindowTitle(fileInfo.fileName());
+    this->updateWindowTitle();
 
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         notTextFile.setInformativeText("Make sure the current user has the permission to read/write to " + visibleFilePath(filePath));
@@ -523,12 +558,16 @@ void NoteTree::openFile(QString filename) {
     }
     notegrid->setSavedFile();
     updateRecentItemsMenu();
-    this->updateWindowTitle(fileInfo.fileName());
+    this->updateWindowTitle();
     settings->setValue("files/lastOpened", filePath);
 }
 
-void NoteTree::updateWindowTitle(QString title) {
-    this->setWindowTitle("Note Tree" + (title.isNull() ? "" : " : " + title));
+void NoteTree::updateWindowTitle() {
+    if (filePath.isEmpty()) {
+        this->setWindowTitle("Note Tree");
+    } else {
+        this->setWindowTitle(shortenedFilePath(filePath));
+    }
     updateStatusBar();
 }
 
