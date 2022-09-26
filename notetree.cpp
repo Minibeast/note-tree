@@ -321,6 +321,7 @@ void NoteTree::changeEditColor() {
 void NoteTree::createFile(QString folder) {
     QString text = QInputDialog::getText(this, "Create File", "Create a file in the favorited folder.", QLineEdit::Normal);
     if (text.isEmpty()) return;
+    if (text.split(".").length() == 1) text += ".txt";
     QDir directory(folder);
     QString tempFilePath = directory.absolutePath() + QDir::separator() + text;
     QFile file(tempFilePath);
