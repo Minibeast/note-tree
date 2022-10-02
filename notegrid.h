@@ -46,12 +46,14 @@ class NoteGrid : public QWidget {
         void decreasePaddingSize();
         void resetPadding();
         void editItem();
+        void itemDoubleClicked();
         void checkChanges();
     private:
         int getItemFromStack(QListWidgetItem *item);
         HeaderType getHeaderTypeFromItem(QListWidgetItem *item);
         QString convertItemToPlainText(QListWidgetItem *item);
         void updateHeaderFontSize();
+        QString findURL(QString item);
         QListWidget* stack;
         int listIndex;
         QString cachedText;

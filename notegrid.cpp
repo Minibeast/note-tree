@@ -24,8 +24,34 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
     grid->setRowStretch(1, 1);
 
     setLayout(grid);
-    notetree->connect(stack, &QListWidget::itemDoubleClicked, this, &NoteGrid::editItem);
+    notetree->connect(stack, &QListWidget::itemDoubleClicked, this, &NoteGrid::itemDoubleClicked);
     notetree->connect(stack->model(), &QAbstractItemModel::rowsAboutToBeMoved, this, &NoteGrid::checkChanges);
+}
+
+QString NoteGrid::findURL(QString item) {
+    QStringList stringList = item.split(" ");
+    // Regex is dumb.
+    foreach (QString stringItem, stringList) {
+        if (stringItem.startsWith("https://") || stringItem.startsWith("ftp://") || stringItem.startsWith("http://")
+        || stringItem.startsWith("mailto:") || stringItem.startsWith("smb://") || stringItem.startsWith("file://")) {
+            return stringItem;
+        }
+    }
+    return "";
+}
+
+void NoteGrid::itemDoubleClicked() {
+    auto items = stack->selectedItems();
+    if (items.length() > 0) {
+        auto item = items[0];
+        int itemIndex = getItemFromStack(item);
+        if (itemIndex != -1) { // This should NEVER fail, but if it does...
+            QString text = convertItemToPlainText(item);
+            QString url = findURL(text);
+            if (!url.isEmpty()) QDesktopServices::openUrl(url);
+            else editItem();
+        }
+    }
 }
 
 void NoteGrid::checkChanges() {
