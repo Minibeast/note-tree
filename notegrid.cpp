@@ -25,7 +25,7 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
 
     setLayout(grid);
     notetree->connect(stack, &QListWidget::itemDoubleClicked, this, &NoteGrid::itemDoubleClicked);
-    notetree->connect(stack->model(), &QAbstractItemModel::rowsAboutToBeMoved, this, &NoteGrid::checkChanges);
+    notetree->connect(stack->model(), &QAbstractItemModel::rowsMoved, this, &NoteGrid::checkChanges);
 }
 
 QString NoteGrid::findURL(QString item) {
@@ -55,7 +55,7 @@ void NoteGrid::itemDoubleClicked() {
 }
 
 void NoteGrid::checkChanges() {
-    isDirty = savedFile == getList();
+    isDirty = savedFile != getList();
     notetree->markSaved();
 }
 
@@ -80,7 +80,6 @@ void NoteGrid::addItemToList(QString text) {
         }
         return;
     }
-    checkChanges();
     auto *item = new QListWidgetItem(text);
 
     if (text.startsWith("# ")) {
@@ -105,6 +104,7 @@ void NoteGrid::addItemToList(QString text) {
     }
     else
         stack->addItem(item);
+    checkChanges();
     stack->scrollToItem(item);
     notetree->updateStatusBar();
 }
@@ -214,9 +214,9 @@ void NoteGrid::deleteItem() {
     auto items = stack->selectedItems();
     foreach(QListWidgetItem* item, items){
         stack->removeItemWidget(item);
-        checkChanges();
         delete item; // Qt documentation warnings you to destroy item to effectively remove it from QListWidget.
     }
+    checkChanges();
     notetree->updateStatusBar();
 }
 
