@@ -400,7 +400,7 @@ QString NoteTree::shortenedFilePath(QString path) {
         for (QString item : tempFolders) {
             tempPath += item + QDir::separator();
         }
-        tempPath = ".../" + tempPath;
+        tempPath = "..." + QString(QDir::separator()) + tempPath;
         tempPath += fileName;
         return tempPath;
     }
