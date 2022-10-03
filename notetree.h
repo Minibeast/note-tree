@@ -36,6 +36,7 @@ class NoteTree : public QMainWindow {
         NoteTree(QWidget *parent = nullptr);
         void markSaved();
         void updateStatusBar();
+        void autosaveFile();
         QSettings* settings;
    public slots:
         void quitMainWindow();
@@ -61,6 +62,7 @@ class NoteTree : public QMainWindow {
         void addDirectoryToFavorites();
         void openFolderLocation(QString folder);
         void changeShortenedPath();
+        void autosaveSlot();
     protected:
         void closeEvent(QCloseEvent *event);
         void dropEvent(QDropEvent *event);
@@ -82,6 +84,7 @@ class NoteTree : public QMainWindow {
         QAction* add_to_favorites;
         QAction* add_folder_to_favorites;
         QAction* always_on_top_cbox;
+        QAction* autosave_file_cbox;
         QMenu *recentItemsGroup;
         QMenu *favorites_menu;
         QStringList recentItems;

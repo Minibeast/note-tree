@@ -56,6 +56,7 @@ void NoteGrid::itemDoubleClicked() {
 
 void NoteGrid::checkChanges() {
     isDirty = savedFile != getList();
+    notetree->autosaveFile();
     notetree->markSaved();
 }
 

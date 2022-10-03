@@ -86,6 +86,9 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     auto *show_chalkboard = new QAction("Show Chalkboard");
     show_chalkboard->setShortcut(QKeySequence("Ctrl+Shift+N"));
     auto *change_shortened_path = new QAction("Change Directories Shown");
+    autosave_file_cbox = new QAction("Autosave");
+    autosave_file_cbox->setCheckable(true);
+    autosave_file_cbox->setChecked(settings->value("file/autosave", false).toBool());
 
     filePath = "";
     this->updateWindowTitle();
@@ -107,6 +110,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     file->addAction(show_chalkboard);
     file->addAction(save_file);
     file->addAction(save_file_as);
+    file->addAction(autosave_file_cbox);
     file->addAction(new_file);
     file->addSeparator();
     file->addAction(quit);
@@ -180,6 +184,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(always_on_top_cbox, SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
     connect(show_chalkboard, SIGNAL(triggered()), this, SLOT(showChalkboard()));
     connect(change_shortened_path, SIGNAL(triggered()), this, SLOT(changeShortenedPath()));
+    connect(autosave_file_cbox, SIGNAL(triggered()), this, SLOT(autosaveSlot()));
 }
 
 void NoteTree::dragEnterEvent(QDragEnterEvent *event) {
@@ -425,6 +430,17 @@ bool NoteTree::closeFile() {
     return false;
 }
 
+void NoteTree::autosaveSlot() {
+    settings->setValue("file/autosave", autosave_file_cbox->isChecked());
+    autosaveFile();
+}
+
+void NoteTree::autosaveFile() {
+    // Try to minimize the amount of unnecessary IO.
+    if (autosave_file_cbox->isChecked() && !filePath.isEmpty() && notegrid->isDirty) {
+        saveFile(false);
+    }
+}
 
 void NoteTree::saveFile(bool saveAs) {
     QString filename;
