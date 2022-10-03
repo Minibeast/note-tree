@@ -54,6 +54,7 @@ class NoteGrid : public QWidget {
         QString convertItemToPlainText(QListWidgetItem *item);
         void updateHeaderFontSize();
         QString findURL(QString item);
+        QString unicodeFormatting(QString item);
         QListWidget* stack;
         int listIndex;
         QString cachedText;

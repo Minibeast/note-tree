@@ -71,6 +71,7 @@ QString NoteGrid::getTextFieldContents() {
 
 void NoteGrid::addItemToList(QString text) {
     text = text.trimmed();
+    text = unicodeFormatting(text);
     if (text.isEmpty()) {
         if (textField->getEditStyle()) {
             listIndex = -1;
@@ -117,10 +118,20 @@ HeaderType NoteGrid::getHeaderTypeFromItem(QListWidgetItem *item) {
 }
 
 QString NoteGrid::convertItemToPlainText(QListWidgetItem *item) {
+    QString result = item->text();
+    result = result.replace("→", "->");
+    result = result.replace("✓", ":check:");
     HeaderType header = getHeaderTypeFromItem(item);
-    if (header == HeaderType::h1) { return "# " + item->text(); }
-    else if (header == HeaderType::h2) { return "## " + item->text(); }
-    else { return item->text(); }
+    if (header == HeaderType::h1) { return "# " + result; }
+    else if (header == HeaderType::h2) { return "## " + result; }
+    else { return result; }
+}
+
+QString NoteGrid::unicodeFormatting(QString item) {
+    QString result;
+    result = item.replace("->", "→");
+    result = item.replace(":check:", "✓");
+    return result;
 }
 
 void NoteGrid::clearTextFieldContents() {
