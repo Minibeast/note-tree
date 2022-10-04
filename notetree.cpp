@@ -417,6 +417,15 @@ void NoteTree::changeShortenedPath() {
     updateWindowTitle();
 }
 
+QString NoteTree::getRelativePath() {
+    QString temp = "";
+    QStringList path_array = filePath.split(QDir::separator());
+    for (int i = 0; i < path_array.length() - 1; i++) {
+        temp += path_array[i] + QString(QDir::separator());
+    }
+    return temp;
+}
+
 bool NoteTree::closeFile() {
     if (checkDirty()) { return true; }
     notegrid->clearList();

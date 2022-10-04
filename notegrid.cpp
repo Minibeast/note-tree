@@ -31,10 +31,25 @@ NoteGrid::NoteGrid(QWidget *parent) : QWidget(parent) {
 QString NoteGrid::findURL(QString item) {
     QStringList stringList = item.split(" ");
     // Regex is dumb.
-    foreach (QString stringItem, stringList) {
+    for (int i = 0; i < stringList.length(); i++) {
+        QString stringItem = stringList[i];
+
+        // Handling for spaces in file/folder names. Spaces need to be escaped due to link checking with split().
+        // What we've learned today kids is to never use spaces in anything!
+        while (stringItem.endsWith("\\") && i < stringList.length() - 1) {
+            stringItem.chop(1);
+            stringItem += " " + stringList[i+1];
+            i++;
+        }
+
         if (stringItem.startsWith("https://") || stringItem.startsWith("ftp://") || stringItem.startsWith("http://")
         || stringItem.startsWith("mailto:") || stringItem.startsWith("smb://") || stringItem.startsWith("file://")) {
             return stringItem;
+        } else if (stringItem.startsWith("<") && stringItem.endsWith(">")) {
+            QString filePath = notetree->getRelativePath();
+            filePath += stringItem.mid(1, stringItem.length() - 2);
+            filePath = "file://" + filePath;
+            return filePath;
         }
     }
     return "";

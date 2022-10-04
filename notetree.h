@@ -37,6 +37,7 @@ class NoteTree : public QMainWindow {
         void markSaved();
         void updateStatusBar();
         void autosaveFile();
+        QString getRelativePath();
         QSettings* settings;
    public slots:
         void quitMainWindow();
