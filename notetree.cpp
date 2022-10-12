@@ -29,16 +29,14 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
 
     auto *quit = new QAction("&Quit", this);
     quit->setShortcut(QKeySequence(QKeySequence::Quit));
-    auto *new_file = new QAction("&Close File", this);
-    new_file->setShortcut(QKeySequence(QKeySequence::Close));
+    auto *new_file = new QAction("&New File", this);
+    new_file->setShortcut(QKeySequence(QKeySequence::New));
     auto *open_file = new QAction("&Open", this);
     open_file->setShortcut(QKeySequence(QKeySequence::Open));
     auto *save_file = new QAction("&Save", this);
     save_file->setShortcut(QKeySequence(QKeySequence::Save));
     auto *save_file_as = new QAction("Save &As", this);
     save_file_as->setShortcut(QKeySequence(QKeySequence::SaveAs));
-    auto *new_line = new QAction("New &Line", this);
-    //new_line->setShortcut(QKeySequence("Return"));
     auto *copy = new QAction("&Copy", this);
     copy->setShortcut(QKeySequence(QKeySequence::Copy));
     auto *cut = new QAction("C&ut", this);
@@ -69,7 +67,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     auto *open_file_location = new QAction("Open File Location", this);
     open_file_location->setShortcut(QKeySequence("Ctrl+Shift+O"));
     auto *new_window = new QAction("New Window", this);
-    new_window->setShortcut(QKeySequence(QKeySequence::New));
+    new_window->setShortcut(QKeySequence("Ctrl+T"));
     add_to_favorites = new QAction("Add to Favorites");
     add_to_favorites->setShortcut(QKeySequence("Ctrl+Shift+F"));
     add_folder_to_favorites = new QAction("Add Folder to Favorites");
@@ -96,9 +94,10 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     QMenu *file = menuBar()->addMenu("&File");
     QMenu *edit = menuBar()->addMenu("&Edit");
     QMenu *view = menuBar()->addMenu("&View");
-    favorites_menu = menuBar()->addMenu("&Favorites");
+    favorites_menu = menuBar()->addMenu("Favorites");
     QMenu *help = menuBar()->addMenu("&Help");
 
+    file->addAction(new_file);
     file->addAction(new_window);
     file->addAction(open_file);
     file->addAction(open_file_location);
@@ -107,36 +106,33 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     clear_recent_items = new QAction("Clear Recent Items");
     connect(clear_recent_items, SIGNAL(triggered()), this, SLOT(clearRecentItems()));
     updateRecentItemsMenu(false); // No reason to set the list when nothing gets modified.
-    file->addAction(show_chalkboard);
+    file->addSeparator();
     file->addAction(save_file);
     file->addAction(save_file_as);
     file->addAction(autosave_file_cbox);
-    file->addAction(new_file);
     file->addSeparator();
     file->addAction(quit);
 
     edit->addAction(cut);
     edit->addAction(copy);
     edit->addAction(paste);
+    edit->addAction(delete_item);
     edit->addSeparator();
     edit->addAction(edit_item);
     edit->addAction(set_edit_color);
-    edit->addSeparator();
-    edit->addAction(new_line);
-    edit->addAction(delete_item);
 
     QMenu *statusbar_menu = view->addMenu("Status Bar");
     statusbar_menu->addAction(view_statusbar);
     statusbar_menu->addSeparator();
     statusbar_menu->addAction(statusbar_showpath);
     statusbar_menu->addAction(statusbar_showcount);
-
     QMenu *padding_menu = view->addMenu("Text Padding");
     padding_menu->addAction(padding_in);
     padding_menu->addAction(padding_out);
     padding_menu->addAction(padding_reset);
-
     view->addAction(change_shortened_path);
+    view->addSeparator();
+    view->addAction(show_chalkboard);
     view->addAction(always_on_top_cbox);
     view->addSeparator();
     view->addAction(zoom_in);
@@ -155,7 +151,6 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     connect(quit, SIGNAL(triggered()), this, SLOT(quitMainWindow()));
     connect(new_file, SIGNAL(triggered()), this, SLOT(closeFile()));
     connect(save_file, SIGNAL(triggered()), this, SLOT(saveFileSlot()));
-    connect(new_line, &QAction::triggered, notegrid, &NoteGrid::addTextToList);
     connect(copy, &QAction::triggered, notegrid, &NoteGrid::copyItem);
     connect(delete_item, &QAction::triggered, notegrid, &NoteGrid::deleteItem);
     connect(cut, &QAction::triggered, notegrid, &NoteGrid::cutItem);
@@ -206,7 +201,8 @@ void NoteTree::showChalkboard() {
 }
 
 void NoteTree::newWindow() {
-    QProcess::startDetached(QFileInfo(QCoreApplication::applicationFilePath()).absoluteFilePath(), QStringList());
+    NoteTree *temp = new NoteTree;
+    temp->show();
 }
 
 void NoteTree::appStarting() {
