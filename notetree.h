@@ -82,7 +82,6 @@ class NoteTree : public QMainWindow {
         QAction* statusbar_showcount;
         QAction* statusbar_showpath;
         QAction* clear_recent_items;
-        QAction* add_to_favorites;
         QAction* add_folder_to_favorites;
         QAction* always_on_top_cbox;
         QAction* autosave_file_cbox;
