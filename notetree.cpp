@@ -89,9 +89,11 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     filePath = "";
     this->updateWindowTitle();
 
+    #if defined(Q_OS_MAC)
     QMenu *dockMenu = new QMenu();
     dockMenu->setAsDockMenu();
     dockMenu->addAction(new_window);
+    #endif
 
     QMenu *file = menuBar()->addMenu("&File");
     QMenu *edit = menuBar()->addMenu("&Edit");
