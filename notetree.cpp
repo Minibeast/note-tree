@@ -1,5 +1,4 @@
 #include "notetree.h"
-#include <QDebug>
 
 #define _STR(x) #x
 #define STRINGIFY(x)  _STR(x)
