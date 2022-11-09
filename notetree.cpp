@@ -1,4 +1,5 @@
 #include "notetree.h"
+#include <QDebug>
 
 #define _STR(x) #x
 #define STRINGIFY(x)  _STR(x)
@@ -406,8 +407,8 @@ QString NoteTree::shortenedFilePath(QString path) {
         for (int i = folders.length() - 2; i < 0 || position_iteration > 0; i-- && position_iteration--) {
             tempFolders.append(folders[i]);
         }
-        // https://stackoverflow.com/a/4078914
-        for(int k = 0; k < (tempFolders.size()/2); k++) tempFolders.swap(k,tempFolders.size()-(1+k));
+        // https://stackoverflow.com/a/1340291
+        std::reverse(tempFolders.begin(), tempFolders.end());
         for (QString item : tempFolders) {
             tempPath += item + QDir::separator();
         }
