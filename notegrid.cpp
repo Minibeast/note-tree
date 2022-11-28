@@ -99,18 +99,21 @@ void NoteGrid::addItemToList(QString text) {
     }
     auto *item = new QListWidgetItem(text);
 
+    QFont font = item->font();
     if (text.startsWith("# ")) {
-        QFont font = item->font();
         font.setWeight(QFont::Bold);
         font.setPointSize(13 + (stackFontSize / 2) + 10);
         item->setFont(font);
         item->setText(text.mid(2));
     } else if (text.startsWith("## ")) {
-        QFont font = item->font();
         font.setItalic(true);
         font.setPointSize(13 + (stackFontSize / 2) + 5);
         item->setFont(font);
         item->setText(text.mid(3));
+    } else if (text.startsWith("### ")) {
+        font.setWeight(QFont::Bold);
+        item->setFont(font);
+        item->setText(text.mid(4));
     }
 
     if (listIndex != -1) {
@@ -128,8 +131,9 @@ void NoteGrid::addItemToList(QString text) {
 
 HeaderType NoteGrid::getHeaderTypeFromItem(QListWidgetItem *item) {
     QFont font = item->font();
-    if (font.weight() == QFont::Bold) { return HeaderType::h1; }
+    if (font.weight() == QFont::Bold && font.pointSize() != 13) { return HeaderType::h1; }
     else if (font.italic()) { return HeaderType::h2; }
+    else if (font.weight() == QFont::Bold) { return HeaderType::h3; }
     else { return HeaderType::None; }
 }
 
@@ -140,6 +144,7 @@ QString NoteGrid::convertItemToPlainText(QListWidgetItem *item) {
     HeaderType header = getHeaderTypeFromItem(item);
     if (header == HeaderType::h1) { return "# " + result; }
     else if (header == HeaderType::h2) { return "## " + result; }
+    else if (header == HeaderType::h3) { return "### " + result; }
     else { return result; }
 }
 
@@ -160,12 +165,12 @@ void NoteGrid::unselectList() {
 
 void NoteGrid::updateHeaderFontSize() {
     for (int i = 0; i < stack->count(); i++) {
-        if (getHeaderTypeFromItem(stack->item(i)) == HeaderType::h1) {
-            QFont font = stack->item(i)->font();
+        HeaderType header = getHeaderTypeFromItem(stack->item(i));
+        QFont font = stack->item(i)->font();
+        if (header == HeaderType::h1) {
             font.setPointSize(13 + (stackFontSize / 2) + 10);
             stack->item(i)->setFont(font);
-        } else if (getHeaderTypeFromItem(stack->item(i)) == HeaderType::h2) {
-            QFont font = stack->item(i)->font();
+        } else if (header == HeaderType::h2) {
             font.setPointSize(13 + (stackFontSize / 2) + 5);
             stack->item(i)->setFont(font);
         }

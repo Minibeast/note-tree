@@ -12,7 +12,7 @@
 class NoteTree;
 
 enum class HeaderType {
-    None, h1, h2
+    None, h1, h2, h3
 };
 
 class NoteGrid : public QWidget {
