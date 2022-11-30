@@ -141,6 +141,7 @@ QString NoteGrid::convertItemToPlainText(QListWidgetItem *item) {
     QString result = item->text();
     result = result.replace("→", "->");
     result = result.replace("✓", ":check:");
+    result = result.replace("--------------", "_line_");
     HeaderType header = getHeaderTypeFromItem(item);
     if (header == HeaderType::h1) { return "# " + result; }
     else if (header == HeaderType::h2) { return "## " + result; }
@@ -152,6 +153,7 @@ QString NoteGrid::unicodeFormatting(QString item) {
     QString result;
     result = item.replace("->", "→");
     result = item.replace(":check:", "✓");
+    result = item.replace("_line_", "--------------");
     return result;
 }
 
