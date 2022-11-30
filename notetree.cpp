@@ -273,7 +273,12 @@ void NoteTree::updateFavoritesMenu(bool setSettingsList) {
             action->addAction(remove_action);
             action->addSeparator();
             QDir directory(favorites[i]);
+
             QStringList files = directory.entryList(QStringList() << "*.txt" << "*.md", QDir::Files);
+            QCollator collator;
+            collator.setNumericMode(true);
+            std::sort(files.begin(), files.end(), collator);
+
             foreach (QString filename, files) {
                 auto *file = new QAction(visibleFilePath(filename));
                 QString tempFilePath = directory.absolutePath() + QDir::separator() + filename;

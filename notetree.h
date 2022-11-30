@@ -26,6 +26,7 @@
 #include <QStandardPaths>
 #include <QInputDialog>
 #include <QMimeData>
+#include <QCollator>
 
 
 class NoteTree : public QMainWindow {
