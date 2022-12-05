@@ -264,12 +264,15 @@ void NoteTree::updateFavoritesMenu(bool setSettingsList) {
             else if (i == 9)
                 open_action->setShortcut(QKeySequence("Ctrl+Shift+0"));
             auto *create_file = new QAction("Create File");
+            auto *merge_file = new QAction("Merge Files");
             connect(create_file, &QAction::triggered, this, [this, i]{ createFile(favorites[i]); });
+            connect(merge_file, &QAction::triggered, this, [this, i]{ mergeFiles(favorites[i]); });
             connect(open_action, &QAction::triggered, this, [this, i]{ openFolderLocation(favorites[i]); });
             auto *remove_action = new QAction("Remove from Favorites");
             connect(remove_action, &QAction::triggered, this, [this, i]{ removeFavorite(favorites[i]); });
             action->addAction(open_action);
             action->addAction(create_file);
+            action->addAction(merge_file);
             action->addAction(remove_action);
             action->addSeparator();
             QDir directory(favorites[i]);
@@ -345,6 +348,50 @@ void NoteTree::createFile(QString folder) {
     file.close();
     updateFavoritesMenu();
     openFile(tempFilePath);
+}
+
+void NoteTree::mergeFiles(QString folder) {
+    QString text = QInputDialog::getText(this, "Merge Files", "Create a file in the favorited folder.", QLineEdit::Normal);
+    if (text.isEmpty()) return;
+    if (text.split(".").length() == 1) text += ".txt";
+    QDir directory(folder);
+    QString tempFilePath = directory.absolutePath() + QDir::separator() + text;
+    QString result = getMergeFileContents(folder);
+    QFile file(tempFilePath);
+    if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << result;
+    }
+    openFile(tempFilePath);
+}
+
+QString NoteTree::getMergeFileContents(QString folder) {
+    QString result = "";
+    QDir directory(folder);
+    QStringList files = directory.entryList(QStringList() << "*.txt" << "*.md", QDir::Files);
+    QCollator collator;
+    collator.setNumericMode(true);
+    std::sort(files.begin(), files.end(), collator);
+
+    foreach (QString filename, files) {
+        QString tempFilePath = directory.absolutePath() + QDir::separator() + filename;
+        QFile file(tempFilePath);
+        QString line;
+        QString item = "";
+        result += ">>>>>>>>>> " + filename + "\n";
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            return nullptr;
+
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            result += line + "\n";
+        }
+        if (result.endsWith("\n")) result.chop(1);
+        result += "<<<<<<<<<<\n\n";
+    }
+    return result;
 }
 
 void NoteTree::clearRecentItems() {

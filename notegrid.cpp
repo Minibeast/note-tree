@@ -87,6 +87,28 @@ QString NoteGrid::getTextFieldContents() {
 
 void NoteGrid::addItemToList(QString text) {
     text = text.trimmed();
+
+    if (text.startsWith(">>>>>>>>>> ")) {
+        QStringList merge_items = text.split("\n");
+        if (merge_items.length() > 1) {
+            addItemToList(merge_items[0]);
+            merge_items.removeAll(merge_items[0]);
+            QString result = "";
+            foreach(QString merge_item, merge_items) {
+                result += merge_item + "\n";
+            }
+            text = result.trimmed();
+        }
+    } else if (text.endsWith("\n<<<<<<<<<<")) {
+        QStringList merge_items = text.split("\n");
+        merge_items.removeLast();
+        QString result = "";
+        foreach(QString merge_item, merge_items) {
+            result += merge_item + "\n";
+        }
+        text = result.trimmed();
+    }
+
     text = unicodeFormatting(text);
     if (text.isEmpty()) {
         if (textField->getEditStyle()) {
@@ -118,6 +140,10 @@ void NoteGrid::addItemToList(QString text) {
         font.setItalic(true);
         item->setFont(font);
         item->setText(text.mid(5));
+    } else if (text.startsWith(">>>>>>>>>> ")) {
+        font.setWeight(QFont::Bold);
+        font.setItalic(true);
+        item->setFont(font);
     }
 
     if (listIndex != -1) {
@@ -137,6 +163,7 @@ HeaderType NoteGrid::getHeaderTypeFromItem(QListWidgetItem *item) {
     QFont font = item->font();
     if (font.weight() == QFont::Bold && font.pointSize() != 13) { return HeaderType::h1; }
     else if (font.italic() && font.pointSize() != 13) { return HeaderType::h2; }
+    else if (item->text().startsWith(">>>>>>>>>> ")) { return HeaderType::MergeHeader; }
     else if (font.weight() == QFont::Bold) { return HeaderType::h3; }
     else if (font.italic()) { return HeaderType::h4; }
     else { return HeaderType::None; }
@@ -153,6 +180,7 @@ QString NoteGrid::convertItemToPlainText(QListWidgetItem *item) {
     else if (header == HeaderType::h2) { return "## " + result; }
     else if (header == HeaderType::h3) { return "### " + result; }
     else if (header == HeaderType::h4) { return "#### " + result; }
+    else if (header == HeaderType::MergeHeader) { return result; }
     else { return result; }
 }
 

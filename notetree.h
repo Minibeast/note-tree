@@ -65,6 +65,7 @@ class NoteTree : public QMainWindow {
         void openFolderLocation(QString folder);
         void changeShortenedPath();
         void autosaveSlot();
+        void mergeFiles(QString folder);
     protected:
         void closeEvent(QCloseEvent *event);
         void dropEvent(QDropEvent *event);
@@ -77,6 +78,7 @@ class NoteTree : public QMainWindow {
         bool checkDirty();
         void updateRecentItemsMenu(bool setSettingsList = true);
         void updateFavoritesMenu(bool setSettingsList = true);
+        QString getMergeFileContents(QString folder);
         QString filePath;
         NoteGrid* notegrid;
         QAction* view_statusbar;
