@@ -33,7 +33,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     new_file->setShortcut(QKeySequence(QKeySequence::New));
     auto *open_file = new QAction("&Open", this);
     open_file->setShortcut(QKeySequence(QKeySequence::Open));
-    auto *save_file = new QAction("&Save", this);
+    save_file = new QAction("&Save", this);
     save_file->setShortcut(QKeySequence(QKeySequence::Save));
     auto *save_file_as = new QAction("Save &As", this);
     save_file_as->setShortcut(QKeySequence(QKeySequence::SaveAs));
@@ -197,6 +197,17 @@ void NoteTree::dropEvent(QDropEvent *event) {
         if (urlList.size() > 0)
             openFile(urlList[0].toString().replace("file://", ""));
     }
+}
+
+void NoteTree::setReadOnly(bool readOnlyVal) {
+    if (readOnlyVal) {
+        save_file->setEnabled(false);
+        autosave_file_cbox->setEnabled(false);
+    } else {
+        save_file->setEnabled(true);
+        autosave_file_cbox->setEnabled(true);
+    }
+    readOnly = readOnlyVal;
 }
 
 void NoteTree::showChalkboard() {
@@ -366,7 +377,7 @@ void NoteTree::mergeFiles(QString folder) {
 }
 
 QString NoteTree::getMergeFileContents(QString folder) {
-    QString result = "";
+    QString result = "__readonly-merge\n";
     QDir directory(folder);
     QStringList files = directory.entryList(QStringList() << "*.txt" << "*.md", QDir::Files);
     QCollator collator;
@@ -490,6 +501,7 @@ bool NoteTree::closeFile() {
     if (!filePath.isEmpty())
         recentItems.insert(0, filePath);
     filePath = "";
+    setReadOnly(false);
     updateRecentItemsMenu();
     settings->setValue("files/lastOpened", "");
     this->updateWindowTitle();
@@ -504,7 +516,7 @@ void NoteTree::autosaveSlot() {
 
 void NoteTree::autosaveFile() {
     // Try to minimize the amount of unnecessary IO.
-    if (autosave_file_cbox->isChecked() && !filePath.isEmpty() && notegrid->isDirty) {
+    if (autosave_file_cbox->isChecked() && !filePath.isEmpty() && notegrid->isDirty && !readOnly) {
         saveFile(false);
     }
 }
@@ -627,6 +639,17 @@ void NoteTree::openFile(QString filename) {
     QTextStream in(&file);
     QString line;
     QString item = "";
+
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.startsWith("__readonly")) setReadOnly(true);
+        else {
+            setReadOnly(false);
+            notegrid->addItemToList(line);
+        }
+        break;
+    }
+
     while (!(line = in.readLine()).isNull())
     {
         if (line.isEmpty() && !item.isEmpty()) {
@@ -651,7 +674,7 @@ void NoteTree::updateWindowTitle() {
     if (filePath.isEmpty()) {
         this->setWindowTitle("Note Tree");
     } else {
-        this->setWindowTitle(shortenedFilePath(filePath));
+        this->setWindowTitle(shortenedFilePath(filePath) + (readOnly ? " (Read Only)" : ""));
     }
     updateStatusBar();
 }
@@ -684,7 +707,7 @@ void NoteTree::quitMainWindow() {
 }
 
 bool NoteTree::checkDirty() {
-    if (!notegrid->isDirty) { return false; }
+    if (!notegrid->isDirty || readOnly) { return false; }
     int ret = saveChanges.exec();
 
     switch (ret) {

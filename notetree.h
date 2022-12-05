@@ -79,6 +79,8 @@ class NoteTree : public QMainWindow {
         void updateRecentItemsMenu(bool setSettingsList = true);
         void updateFavoritesMenu(bool setSettingsList = true);
         QString getMergeFileContents(QString folder);
+        bool readOnly = false;
+        void setReadOnly(bool readOnlyVal);
         QString filePath;
         NoteGrid* notegrid;
         QAction* view_statusbar;
@@ -88,6 +90,7 @@ class NoteTree : public QMainWindow {
         QAction* add_folder_to_favorites;
         QAction* always_on_top_cbox;
         QAction* autosave_file_cbox;
+        QAction* save_file;
         QMenu *recentItemsGroup;
         QMenu *favorites_menu;
         QStringList recentItems;
