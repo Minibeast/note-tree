@@ -23,7 +23,7 @@ class NoteGrid : public QWidget {
         NoteGrid(QWidget *parent = nullptr);
         QString getTextFieldContents();
         void clearTextFieldContents();
-        void addItemToList(QString text);
+        void addItemToList(QString text, bool unpackingFile = false);
         void unselectList();
         void clearList();
         void exitEdit();

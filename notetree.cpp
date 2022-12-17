@@ -645,7 +645,7 @@ void NoteTree::openFile(QString filename) {
         if (line.startsWith("__readonly")) setReadOnly(true);
         else {
             setReadOnly(false);
-            notegrid->addItemToList(line);
+            notegrid->addItemToList(line, true);
         }
         break;
     }
@@ -654,7 +654,7 @@ void NoteTree::openFile(QString filename) {
     {
         if (line.isEmpty() && !item.isEmpty()) {
             item = item.replace("\n,\n", "\n\n");
-            notegrid->addItemToList(item);
+            notegrid->addItemToList(item, true);
             item = "";
         } else {
             item += line + "\n";
@@ -662,7 +662,7 @@ void NoteTree::openFile(QString filename) {
     }
     if (!item.isEmpty()) {
         item = item.replace("\n,\n", "\n\n");
-        notegrid->addItemToList(item);
+        notegrid->addItemToList(item, true);
     }
     notegrid->setSavedFile();
     updateRecentItemsMenu();

@@ -85,7 +85,7 @@ QString NoteGrid::getTextFieldContents() {
     return textField->toPlainText();
 }
 
-void NoteGrid::addItemToList(QString text) {
+void NoteGrid::addItemToList(QString text, bool unpackingFile) {
     text = text.trimmed();
 
     if (text.startsWith(">>>>>>>>>> ")) {
@@ -154,7 +154,10 @@ void NoteGrid::addItemToList(QString text) {
     }
     else
         stack->addItem(item);
-    checkChanges();
+
+    if (!unpackingFile)
+        checkChanges();
+
     stack->scrollToItem(item);
     notetree->updateStatusBar();
 }
