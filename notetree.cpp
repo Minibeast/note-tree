@@ -76,6 +76,7 @@ NoteTree::NoteTree(QWidget *parent) : QMainWindow(parent) {
     edit_item->setShortcut(QKeySequence("Ctrl+E"));
     auto *set_edit_color = new QAction("Set Edit Color");
     always_on_top_cbox = new QAction("Always on Top");
+    always_on_top_cbox->setShortcut(QKeySequence("Ctrl+Alt+T"));
     always_on_top_cbox->setCheckable(true);
     always_on_top_cbox->setChecked(settings->value("view/alwaysontop", false).toBool());
     toggleAlwaysOnTop();
